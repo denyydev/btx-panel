@@ -1,8 +1,8 @@
 "use client";
 
+import { useLogin } from "@/shared/hooks/useAuth";
 import { Button, Input } from "@heroui/react";
 import { useState } from "react";
-import { useLogin } from "@/shared/hooks/useAuth";
 
 export default function LoginPage() {
   const loginMutation = useLogin();
@@ -17,7 +17,8 @@ export default function LoginPage() {
     try {
       await loginMutation.mutateAsync({ username, password });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Ошибка входа. Проверьте данные.";
+      const message =
+        err instanceof Error ? err.message : "Ошибка входа. Проверьте данные.";
       setError(message);
     }
   };

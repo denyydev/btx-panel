@@ -4,10 +4,6 @@ import { HeroUIProvider } from '@heroui/react';
 import { ReactNode } from 'react';
 
 export function HeroProvider({ children }: { children: ReactNode }) {
-  return (
-    <HeroUIProvider>
-      {children}
-    </HeroUIProvider>
-  );
+  return <HeroUIProvider>{children}</HeroUIProvider>;
 }
 

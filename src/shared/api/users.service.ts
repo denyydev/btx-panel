@@ -1,8 +1,18 @@
+export type Role = "admin" | "user" | "moderator";
+
 export interface User {
-  id: string;
-  name: string;
+  id: number;
+
+  firstName: string;
+  lastName: string;
+  maidenName?: string;
+
   email: string;
-  role: 'admin' | 'user';
+  birthDate?: string;
+  image?: string;
+
+  gender?: string;
+  role: Role;
 }
 
 export interface GetUsersParams {
@@ -13,112 +23,149 @@ export interface GetUsersParams {
 }
 
 export interface GetUsersResponse {
-  data: User[];
+  users: User[];
   total: number;
+  skip: number;
+  limit: number;
 }
 
 export interface CreateUserRequest {
   name: string;
   email: string;
-  role: 'admin' | 'user';
+  birthDate?: string;
+  role?: Role;
+  image?: string;
 }
 
 export interface UpdateUserRequest {
   name?: string;
   email?: string;
-  role?: 'admin' | 'user';
+  birthDate?: string;
+  role?: Role;
+  image?: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://dummyjson.com";
 
-const mockUsers: User[] = [
-  { id: '1', name: 'John Doe', email: 'john@example.com', role: 'user' },
-  { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'user' },
-  { id: '3', name: 'Bob Johnson', email: 'bob@example.com', role: 'admin' },
-  { id: '4', name: 'Alice Williams', email: 'alice@example.com', role: 'user' },
-  { id: '5', name: 'Charlie Brown', email: 'charlie@example.com', role: 'user' },
-];
+const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(init?.headers || {}),
+    },
+    cache: "no-store",
+  });
 
-let usersData = [...mockUsers];
-let nextId = 6;
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `Request failed: ${res.status}`);
+  }
+
+  return (await res.json()) as T;
+};
+
+const splitName = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  const firstName = parts[0] ?? "";
+  const lastName = parts.slice(1).join(" ");
+  return { firstName, lastName };
+};
+
+const mapSort = (
+  sort?: string
+): { sortBy?: string; order?: "asc" | "desc" } => {
+  if (!sort) return {};
+  const [fieldRaw, dirRaw] = sort.split(":");
+  const order = dirRaw === "desc" ? "desc" : "asc";
+
+  const field = (fieldRaw || "").trim();
+
+  if (field === "name") return { sortBy: "firstName", order };
+  if (field === "email") return { sortBy: "email", order };
+  if (field === "birthDate") return { sortBy: "birthDate", order };
+  if (field === "role") return { sortBy: "role", order };
+  if (field === "firstName") return { sortBy: "firstName", order };
+  if (field === "lastName") return { sortBy: "lastName", order };
+
+  return {};
+};
+
+const buildQuery = (params?: GetUsersParams) => {
+  const qs = new URLSearchParams();
+
+  if (params?.limit != null) qs.set("limit", String(params.limit));
+  if (params?.skip != null) qs.set("skip", String(params.skip));
+
+  const { sortBy, order } = mapSort(params?.sort);
+  if (sortBy) qs.set("sortBy", sortBy);
+  if (order) qs.set("order", order);
+
+  const s = qs.toString();
+  return s ? `?${s}` : "";
+};
 
 export const usersApi = {
   getUsers: async (params?: GetUsersParams): Promise<GetUsersResponse> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        let filtered = [...usersData];
+    if (params?.search?.trim()) {
+      const qs = new URLSearchParams();
+      qs.set("q", params.search.trim());
 
-        if (params?.search) {
-          const searchLower = params.search.toLowerCase();
-          filtered = filtered.filter(
-            (user) =>
-              user.name.toLowerCase().includes(searchLower) ||
-              user.email.toLowerCase().includes(searchLower)
-          );
-        }
+      if (params.limit != null) qs.set("limit", String(params.limit));
+      if (params.skip != null) qs.set("skip", String(params.skip));
 
-        if (params?.sort) {
-          const [field, direction] = params.sort.split(':');
-          filtered.sort((a, b) => {
-            const aVal = a[field as keyof User] || '';
-            const bVal = b[field as keyof User] || '';
-            const comparison = String(aVal).localeCompare(String(bVal));
-            return direction === 'desc' ? -comparison : comparison;
-          });
-        }
+      const { sortBy, order } = mapSort(params.sort);
+      if (sortBy) qs.set("sortBy", sortBy);
+      if (order) qs.set("order", order);
 
-        const total = filtered.length;
-        const skip = params?.skip || 0;
-        const limit = params?.limit || 10;
-        const paginated = filtered.slice(skip, skip + limit);
+      return request<GetUsersResponse>(`/users/search?${qs.toString()}`, {
+        method: "GET",
+      });
+    }
 
-        resolve({
-          data: paginated,
-          total,
-        });
-      }, 300);
+    return request<GetUsersResponse>(`/users${buildQuery(params)}`, {
+      method: "GET",
     });
   },
 
   createUser: async (data: CreateUserRequest): Promise<User> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newUser: User = {
-          id: String(nextId++),
-          ...data,
-        };
-        usersData.push(newUser);
-        resolve(newUser);
-      }, 300);
+    const { firstName, lastName } = splitName(data.name);
+
+    return request<User>(`/users/add`, {
+      method: "POST",
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        email: data.email,
+        birthDate: data.birthDate,
+        role: data.role ?? "user",
+        image: data.image,
+      }),
     });
   },
 
-  updateUser: async (id: string, data: UpdateUserRequest): Promise<User> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const index = usersData.findIndex((u) => u.id === id);
-        if (index === -1) {
-          reject(new Error('User not found'));
-          return;
-        }
-        usersData[index] = { ...usersData[index], ...data };
-        resolve(usersData[index]);
-      }, 300);
+  updateUser: async (id: number, data: UpdateUserRequest): Promise<User> => {
+    const patch: Record<string, unknown> = {};
+
+    if (data.name != null) {
+      const { firstName, lastName } = splitName(data.name);
+      patch.firstName = firstName;
+      patch.lastName = lastName;
+    }
+    if (data.email != null) patch.email = data.email;
+    if (data.birthDate != null) patch.birthDate = data.birthDate;
+    if (data.role != null) patch.role = data.role;
+    if (data.image != null) patch.image = data.image;
+
+    return request<User>(`/users/${encodeURIComponent(String(id))}`, {
+      method: "PATCH", // можно PUT
+      body: JSON.stringify(patch),
     });
   },
 
-  deleteUser: async (id: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const index = usersData.findIndex((u) => u.id === id);
-        if (index === -1) {
-          reject(new Error('User not found'));
-          return;
-        }
-        usersData.splice(index, 1);
-        resolve();
-      }, 300);
+  deleteUser: async (id: number): Promise<void> => {
+    await request<unknown>(`/users/${encodeURIComponent(String(id))}`, {
+      method: "DELETE",
     });
   },
 };
-

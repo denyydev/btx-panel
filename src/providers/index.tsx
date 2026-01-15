@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { QueryProvider } from './query-provider';
-import { HeroProvider } from './hero-provider';
+import { HeroUIProvider } from "@heroui/react";
+import { ReactNode } from "react";
+import { QueryProvider } from "./query-provider";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryProvider>
-      <HeroProvider>{children}</HeroProvider>
+      <HeroUIProvider>{children}</HeroUIProvider>
     </QueryProvider>
   );
 }
-

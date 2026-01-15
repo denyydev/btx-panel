@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import styles from '../styles/sidebar.module.scss';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import styles from "../styles/sidebar.module.scss";
 
 export function Sidebar() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/dashboard/users', label: 'Users' },
-    { href: '/dashboard/admins', label: 'Admins' },
-    { href: '/dashboard/posts', label: 'Posts' },
+    { href: "/dashboard/posts", label: "Публикации" },
+    { href: "/dashboard/admins", label: "Администраторы" },
+    { href: "/dashboard/users", label: "Пользователи" },
   ];
 
   return (
@@ -24,7 +24,7 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={`${styles.sidebar__navItem} ${
-                isActive ? styles.sidebar__navItemActive : ''
+                isActive ? styles.sidebar__navItemActive : ""
               }`}
             >
               {item.label}
@@ -35,4 +35,3 @@ export function Sidebar() {
     </aside>
   );
 }
-

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
-import { Sidebar } from '@/shared/ui/Sidebar';
-import { useAuthStore } from '@/shared/store/auth.store';
-import { useSocket } from '@/shared/hooks/useSocket';
-import { useAuthMe } from '@/shared/hooks/useAuth';
+import { useAuthMe } from "@/shared/hooks/useAuth";
+import { useSocket } from "@/shared/hooks/useSocket";
+import { useAuthStore } from "@/shared/store/auth.store";
+import { Sidebar } from "@/shared/ui/Sidebar";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-const JWT_COOKIE_NAME = 'auth_token';
+const JWT_COOKIE_NAME = "auth_token";
 
 export default function DashboardLayout({
   children,
@@ -23,7 +23,7 @@ export default function DashboardLayout({
 
   const logout = () => {
     logoutStore();
-    router.push('/login');
+    router.push("/login");
   };
 
   useSocket();
@@ -39,7 +39,7 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!isLoading) {
       if (isError || (!isAuthenticated && !token)) {
-        router.push('/login');
+        router.push("/login");
       }
     }
   }, [isAuthenticated, token, isLoading, isError, router]);
@@ -51,19 +51,12 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen">
       <Sidebar />
-      <main className="flex-1 overflow-auto ml-[250px] p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Выйти
-          </button>
-        </div>
+      <main
+        className="flex-1 ml-[250px] p-6 overflow-y-auto"
+        style={{ position: "relative" }}
+      >
         {children}
       </main>
     </div>
   );
 }
-
