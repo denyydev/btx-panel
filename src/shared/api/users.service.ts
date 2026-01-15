@@ -15,6 +15,21 @@ export interface User {
   role: Role;
 }
 
+export interface UserMetrics {
+  postCount: number;
+  likeCount: number;
+  commentCount: number;
+}
+
+export type UserWithMetrics = User & UserMetrics;
+
+export interface GetUsersWithMetricsResponse {
+  users: UserWithMetrics[];
+  total: number;
+  skip: number;
+  limit: number;
+}
+
 export interface GetUsersParams {
   limit?: number;
   skip?: number;
@@ -45,7 +60,7 @@ export interface UpdateUserRequest {
   image?: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://dummyjson.com";
+const API_BASE_URL = "/api";
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -167,5 +182,18 @@ export const usersApi = {
     await request<unknown>(`/users/${encodeURIComponent(String(id))}`, {
       method: "DELETE",
     });
+  },
+  getUsersWithMetrics: async (
+    params?: GetUsersParams
+  ): Promise<GetUsersWithMetricsResponse> => {
+    const qs = new URLSearchParams();
+    if (params?.limit != null) qs.set("limit", String(params.limit));
+    if (params?.skip != null) qs.set("skip", String(params.skip));
+    return request<GetUsersWithMetricsResponse>(
+      `/users/metrics?${qs.toString()}`,
+      {
+        method: "GET",
+      }
+    );
   },
 };

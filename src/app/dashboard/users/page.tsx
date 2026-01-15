@@ -6,7 +6,7 @@ import {
   useCreateUser,
   useDeleteUser,
   useUpdateUser,
-  useUsersQuery,
+  useUsersWithMetricsQuery,
 } from "@/shared/hooks/useUsers";
 import {
   Avatar,
@@ -161,11 +161,11 @@ export default function UsersPage() {
       : undefined;
   }, [sortDescriptor]);
 
-  const { data, isLoading, error } = useUsersQuery({
+  const { data, isLoading, error } = useUsersWithMetricsQuery({
     limit: rowsPerPage,
     skip,
     sort,
-  });
+  } as any);
 
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
@@ -178,6 +178,7 @@ export default function UsersPage() {
       setToastMessage({ message: payload.message, type: "success" });
       setTimeout(() => setToastMessage(null), 3000);
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", "metrics"] });
     };
 
     socket.on("user:changed", handleUserChanged);
@@ -323,7 +324,7 @@ export default function UsersPage() {
   };
 
   const pages = data ? Math.ceil((data as any).total / rowsPerPage) : 1;
-  const rows = (data as any)?.data || (data as any)?.users || [];
+  const rows = (data as any)?.users || [];
 
   if (error) {
     return (
@@ -376,19 +377,19 @@ export default function UsersPage() {
                 <TableColumn key="actions" className="w-12" />
               </TableHeader>
 
-              <TableBody emptyContent="Пользователи не найдены">
-                {rows.map((u: any) => {
+              <TableBody items={rows} emptyContent="Пользователи не найдены">
+                {(u: any) => {
                   const fullName =
                     u?.name ||
                     [u?.firstName, u?.lastName]
                       .filter(Boolean)
                       .join(" ")
                       .trim();
-                  const posts = toNumberOrDash(u?.posts ?? u?.postCount);
-                  const likes = toNumberOrDash(u?.likes ?? u?.likeCount);
-                  const comments = toNumberOrDash(
-                    u?.comments ?? u?.commentCount
-                  );
+
+                  const posts = toNumberOrDash(u?.postCount);
+                  const likes = toNumberOrDash(u?.likeCount);
+                  const comments = toNumberOrDash(u?.commentCount);
+
                   return (
                     <TableRow key={u.id}>
                       <TableCell>
@@ -454,7 +455,7 @@ export default function UsersPage() {
                       </TableCell>
                     </TableRow>
                   );
-                })}
+                }}
               </TableBody>
             </Table>
 

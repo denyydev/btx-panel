@@ -47,3 +47,11 @@ export const useDeleteUser = () => {
     },
   });
 };
+
+export const useUsersWithMetricsQuery = (params?: GetUsersParams) => {
+  return useQuery({
+    queryKey: ["users", "metrics", params],
+    queryFn: () => usersApi.getUsersWithMetrics(params),
+    staleTime: 30 * 1000,
+  });
+};
