@@ -1,9 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersApi, GetUsersParams, CreateUserRequest, UpdateUserRequest } from '../api/users.service';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  CreateUserRequest,
+  GetUsersParams,
+  UpdateUserRequest,
+  usersApi,
+} from "../api/users.service";
 
 export const useUsersQuery = (params?: GetUsersParams) => {
   return useQuery({
-    queryKey: ['users', params],
+    queryKey: ["users", params],
     queryFn: () => usersApi.getUsers(params),
     staleTime: 30 * 1000,
   });
@@ -15,7 +20,7 @@ export const useCreateUser = () => {
   return useMutation({
     mutationFn: (data: CreateUserRequest) => usersApi.createUser(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
@@ -27,7 +32,7 @@ export const useUpdateUser = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateUserRequest }) =>
       usersApi.updateUser(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
@@ -38,8 +43,7 @@ export const useDeleteUser = () => {
   return useMutation({
     mutationFn: (id: string) => usersApi.deleteUser(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
-
