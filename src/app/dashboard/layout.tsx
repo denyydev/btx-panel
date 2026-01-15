@@ -31,32 +31,22 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const cookieToken = Cookies.get(JWT_COOKIE_NAME);
-    if (cookieToken && !token) {
-      setToken(cookieToken);
-    }
+    if (cookieToken && !token) setToken(cookieToken);
   }, [token, setToken]);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (isError || (!isAuthenticated && !token)) {
-        router.push("/login");
-      }
+    if (!isLoading && (isError || (!isAuthenticated && !token))) {
+      router.push("/login");
     }
   }, [isAuthenticated, token, isLoading, isError, router]);
 
-  if (isLoading || (!isAuthenticated && !token)) {
-    return null;
-  }
+  if (isLoading || (!isAuthenticated && !token)) return null;
 
   return (
-    <div className="flex h-screen">
+    <div className="min-h-screen w-full bg-[#E6F1FE] flex">
       <Sidebar />
-      <main
-        className="flex-1 ml-[250px] p-6 overflow-y-auto"
-        style={{ position: "relative" }}
-      >
-        {children}
-      </main>
+
+      <main className="flex-1 overflow-y-auto px-20 py-20">{children}</main>
     </div>
   );
 }
