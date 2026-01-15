@@ -1,0 +1,56 @@
+@import './variables.scss';
+
+.sidebar {
+  width: $sidebar-width;
+  height: 100vh;
+  background: var(--background);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  padding: $spacing-lg;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  transition: transform $transition-normal ease-in-out;
+
+  @media (prefers-color-scheme: dark) {
+    border-right-color: rgba(255, 255, 255, 0.1);
+  }
+
+  &__logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: $spacing-xl;
+    color: var(--foreground);
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__navItem {
+    padding: $spacing-md;
+    border-radius: $border-radius;
+    transition: background-color $transition-fast;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--foreground);
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    &Active {
+      background-color: rgba(0, 112, 243, 0.1);
+      font-weight: 600;
+    }
+  }
+}
+

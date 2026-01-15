@@ -1,0 +1,37 @@
+{
+  "name": "btx-panel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "socket": "node socket-server.js"
+  },
+  "dependencies": {
+    "@heroui/react": "^2.8.7",
+    "@heroui/theme": "^2.4.25",
+    "@tanstack/react-query": "^5.90.17",
+    "js-cookie": "^3.0.5",
+    "next": "16.1.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
+    "zustand": "^5.0.10"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.2",
+    "sass": "^1.97.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
