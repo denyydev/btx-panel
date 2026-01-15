@@ -1,7 +1,8 @@
 "use client";
 
 import { useLogin } from "@/shared/hooks/useAuth";
-import { Button, Input } from "@heroui/react";
+import { AppInput } from "@/shared/ui/AppInput/AppInput";
+import { Button } from "@heroui/react";
 import { useState } from "react";
 
 export default function LoginPage() {
@@ -24,38 +25,49 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg">
-        <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">
-            Вход в панель управления
-          </h2>
+    <div className="min-h-screen w-full bg-[#E6F1FE] flex items-center justify-center">
+      <div className="w-full max-w-[565px] rounded-[32px] bg-white p-[60px] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] flex flex-col items-center gap-10">
+        <div className="text-[#006FEE] font-semibold tracking-tight text-2xl leading-none select-none">
+          BTX•
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <Input
-              label="Имя пользователя"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              variant="bordered"
-            />
-            <Input
-              label="Пароль"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              variant="bordered"
-            />
-          </div>
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
+        <div className="w-full max-w-[445px] flex flex-col items-center gap-5">
+          <div className="w-full text-[36px] leading-[40px] font-semibold text-[#11181C] text-center">
+            Панель администратора
+          </div>
+          <div className="w-full text-[18px] leading-[28px] font-normal text-[#3F3F46] text-center">
+            Войдите в систему для продолжения
+          </div>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-[445px] flex flex-col items-stretch gap-7"
+        >
+          <AppInput
+            label="Имя пользователя"
+            placeholder="Введите имя пользователя"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+
+          <AppInput
+            label="Пароль"
+            placeholder="Введите пароль"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <div className="min-h-[20px] text-sm text-red-600">
+            {error ? error : "\u00A0"}
+          </div>
 
           <Button
             type="submit"
-            color="primary"
-            className="w-full"
+            className="w-full h-12 rounded-[12px] bg-[#006FEE] text-white text-[16px] leading-[24px] font-normal"
             isLoading={loginMutation.isPending}
           >
             Войти
