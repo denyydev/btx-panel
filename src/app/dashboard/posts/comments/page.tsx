@@ -1,10 +1,10 @@
 "use client";
 
 import { usePostCommentsQuery } from "@/shared/hooks/usePosts";
+import { AppPagination } from "@/shared/ui/AppPagination/AppPagination";
 import {
   Avatar,
   Button,
-  Pagination,
   Select,
   SelectItem,
   Spinner,
@@ -121,15 +121,13 @@ export default function CommentsPage() {
                 <SelectItem key={String(option)}>{option}</SelectItem>
               ))}
             </Select>
-
-            {pages > 1 && (
-              <Pagination
-                total={pages}
-                page={page}
-                onChange={setPage}
-                showControls
-              />
-            )}
+            <AppPagination
+              page={page}
+              totalPages={pages}
+              totalItems={total}
+              pageSize={limit}
+              onChange={setPage}
+            />
           </div>
         </>
       )}

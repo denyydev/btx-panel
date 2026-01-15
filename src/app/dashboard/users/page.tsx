@@ -8,6 +8,7 @@ import {
   useUpdateUser,
   useUsersWithMetricsQuery,
 } from "@/shared/hooks/useUsers";
+import { AppPagination } from "@/shared/ui/AppPagination/AppPagination";
 import {
   Avatar,
   Button,
@@ -22,9 +23,6 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Pagination,
-  Select,
-  SelectItem,
   Spinner,
   Table,
   TableBody,
@@ -459,32 +457,17 @@ export default function UsersPage() {
               </TableBody>
             </Table>
 
-            <div className="flex items-center justify-between">
-              <Select
-                selectedKeys={[String(rowsPerPage)]}
-                onSelectionChange={(keys) => {
-                  const value = Array.from(keys)[0] as string | undefined;
-                  if (!value) return;
-                  setRowsPerPage(Number(value));
-                  setPage(1);
-                }}
-                className="w-32"
-                variant="bordered"
-              >
-                {ROWS_PER_PAGE_OPTIONS.map((option) => (
-                  <SelectItem key={String(option)}>{option}</SelectItem>
-                ))}
-              </Select>
-
-              {pages > 1 && (
-                <Pagination
-                  total={pages}
-                  page={page}
-                  onChange={setPage}
-                  showControls
-                />
-              )}
-            </div>
+            <AppPagination
+              page={page}
+              totalPages={pages}
+              onChange={setPage}
+              pageSize={rowsPerPage}
+              pageSizeOptions={ROWS_PER_PAGE_OPTIONS}
+              onPageSizeChange={(v) => {
+                setRowsPerPage(v);
+                setPage(1);
+              }}
+            />
           </>
         )}
       </div>

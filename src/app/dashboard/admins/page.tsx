@@ -8,6 +8,7 @@ import {
   useUpdateAdmin,
 } from "@/shared/hooks/useAdmins";
 import { useSocket } from "@/shared/hooks/useSocket";
+import { AppPagination } from "@/shared/ui/AppPagination/AppPagination";
 import {
   Avatar,
   Button,
@@ -22,7 +23,6 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Pagination,
   Select,
   SelectItem,
   Spinner,
@@ -514,14 +514,13 @@ export default function AdminsPage() {
                 ))}
               </Select>
 
-              {pages > 1 && (
-                <Pagination
-                  total={pages}
-                  page={page}
-                  onChange={setPage}
-                  showControls
-                />
-              )}
+              <AppPagination
+                page={page}
+                totalPages={pages}
+                onChange={setPage}
+                pageSize={rowsPerPage}
+                onPageSizeClick={() => {}}
+              />
             </div>
           </>
         )}
