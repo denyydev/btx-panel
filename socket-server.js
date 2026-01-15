@@ -18,6 +18,11 @@ io.on('connection', (socket) => {
     socket.emit('message', { echo: data });
   });
 
+  socket.on('user:changed', (data) => {
+    console.log('User changed event:', data);
+    io.emit('user:changed', data);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
   });

@@ -1,40 +1,37 @@
+import { http } from './http';
+
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
 export interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    role: 'admin' | 'user';
-  };
+  accessToken: string;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  image: string;
 }
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          token: 'mock_jwt_token_' + Date.now(),
-          user: {
-            id: '1',
-            email: data.email,
-            name: 'Admin User',
-            role: 'admin',
-          },
-        });
-      }, 500);
+    return http<LoginResponse>('/auth/login', {
+      method: 'POST',
+      body: data,
     });
   },
 
-  logout: async (): Promise<void> => {
-  },
-
-  verifyToken: async (token: string): Promise<boolean> => {
-    return Promise.resolve(true);
+  me: async (token: string): Promise<User> => {
+    return http<User>('/auth/me', {
+      method: 'GET',
+      token,
+    });
   },
 };
 

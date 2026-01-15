@@ -2,9 +2,13 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 import { Sidebar } from '@/shared/ui/Sidebar';
 import { useAuthStore } from '@/shared/store/auth.store';
 import { useSocket } from '@/shared/hooks/useSocket';
+import { useAuthMe } from '@/shared/hooks/useAuth';
+
+const JWT_COOKIE_NAME = 'auth_token';
 
 export default function DashboardLayout({
   children,
@@ -13,22 +17,34 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const checkAuth = useAuthStore((state) => state.checkAuth);
-  const logout = useAuthStore((state) => state.logout);
+  const logoutStore = useAuthStore((state) => state.logout);
+  const token = useAuthStore((state) => state.token);
+  const setToken = useAuthStore((state) => state.setToken);
+
+  const logout = () => {
+    logoutStore();
+    router.push('/login');
+  };
 
   useSocket();
+  const { isLoading, isError } = useAuthMe();
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
+    const cookieToken = Cookies.get(JWT_COOKIE_NAME);
+    if (cookieToken && !token) {
+      setToken(cookieToken);
     }
-  }, [isAuthenticated, router]);
+  }, [token, setToken]);
 
-  if (!isAuthenticated) {
+  useEffect(() => {
+    if (!isLoading) {
+      if (isError || (!isAuthenticated && !token)) {
+        router.push('/login');
+      }
+    }
+  }, [isAuthenticated, token, isLoading, isError, router]);
+
+  if (isLoading || (!isAuthenticated && !token)) {
     return null;
   }
 

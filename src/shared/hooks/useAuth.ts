@@ -1,40 +1,60 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 import { authApi, LoginRequest } from '../api/auth.service';
 import { useAuthStore } from '../store/auth.store';
+import Cookies from 'js-cookie';
 
-export const useAuth = () => {
+const JWT_COOKIE_NAME = 'auth_token';
+
+export const useLogin = () => {
   const router = useRouter();
-  const setUser = useAuthStore((state) => {
-    return (user: typeof state.user) => {
-      state.user = user;
-      state.isAuthenticated = !!user;
-    };
-  });
+  const setToken = useAuthStore((state) => state.setToken);
+  const setUser = useAuthStore((state) => state.setUser);
 
-  const loginMutation = useMutation({
+  return useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
-    onSuccess: (response) => {
-      Cookies.set('auth_token', response.token, {
-        expires: 7,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-      });
+    onSuccess: async (response) => {
+      const token = response.accessToken;
+      setToken(token);
 
-      setUser(response.user);
-
-      router.push('/dashboard');
-    },
-    onError: (error) => {
-      console.error('Login error:', error);
+      try {
+        const user = await authApi.me(token);
+        setUser(user);
+        router.push('/dashboard/users');
+      } catch (error) {
+        setToken(null);
+        throw error;
+      }
     },
   });
-
-  return {
-    login: loginMutation.mutate,
-    isLoading: loginMutation.isPending,
-    error: loginMutation.error,
-  };
 };
 
+export const useAuthMe = () => {
+  const token = Cookies.get(JWT_COOKIE_NAME) || null;
+  const setUser = useAuthStore((state) => state.setUser);
+  const setToken = useAuthStore((state) => state.setToken);
+
+  return useQuery({
+    queryKey: ['auth', 'me', token],
+    queryFn: async () => {
+      if (!token) {
+        setUser(null);
+        setToken(null);
+        return null;
+      }
+      try {
+        const user = await authApi.me(token);
+        setUser(user);
+        setToken(token);
+        return user;
+      } catch (error) {
+        setUser(null);
+        setToken(null);
+        Cookies.remove(JWT_COOKIE_NAME);
+        throw error;
+      }
+    },
+    enabled: !!token,
+    retry: false,
+  });
+};

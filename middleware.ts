@@ -17,7 +17,7 @@ export function middleware(request: NextRequest) {
   if (pathname === '/login') {
     const token = request.cookies.get('auth_token');
     if (token) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/dashboard/users', request.url));
     }
   }
 

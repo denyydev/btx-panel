@@ -1,87 +1,47 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'admin' | 'user';
-}
+import type { User } from '../api/auth.service';
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  token: string | null;
+  setToken: (token: string | null) => void;
+  setUser: (user: User | null) => void;
   logout: () => void;
-  checkAuth: () => void;
 }
 
 const JWT_COOKIE_NAME = 'auth_token';
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
-  isLoading: false,
+  token: null,
 
-  login: async (email: string, password: string) => {
-    set({ isLoading: true });
-    
-    try {
-      const mockToken = 'mock_jwt_token_' + Date.now();
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: 'Admin User',
-        role: 'admin',
-      };
-
-      Cookies.set(JWT_COOKIE_NAME, mockToken, {
+  setToken: (token: string | null) => {
+    if (token) {
+      Cookies.set(JWT_COOKIE_NAME, token, {
         expires: 7,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
       });
-
-      set({
-        user: mockUser,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch (error) {
-      set({ isLoading: false });
-      throw error;
+    } else {
+      Cookies.remove(JWT_COOKIE_NAME);
     }
+    set({ token, isAuthenticated: !!token });
+  },
+
+  setUser: (user: User | null) => {
+    set({ user, isAuthenticated: !!user && !!get().token });
   },
 
   logout: () => {
     Cookies.remove(JWT_COOKIE_NAME);
     set({
       user: null,
+      token: null,
       isAuthenticated: false,
     });
-  },
-
-  checkAuth: () => {
-    const token = Cookies.get(JWT_COOKIE_NAME);
-    
-    if (token) {
-      const mockUser: User = {
-        id: '1',
-        email: 'admin@example.com',
-        name: 'Admin User',
-        role: 'admin',
-      };
-
-      set({
-        user: mockUser,
-        isAuthenticated: true,
-      });
-    } else {
-      set({
-        user: null,
-        isAuthenticated: false,
-      });
-    }
   },
 }));
 
