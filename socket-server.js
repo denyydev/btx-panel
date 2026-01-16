@@ -1,35 +1,42 @@
-const { Server } = require('socket.io');
-const http = require('http');
+const http = require("http");
+const { Server } = require("socket.io");
+
+const PORT = process.env.SOCKET_PORT || 3001;
+const CLIENT_ORIGIN = process.env.SOCKET_ORIGIN || "http://localhost:3000";
 
 const server = http.createServer();
+
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
+    origin: CLIENT_ORIGIN,
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
 
-  socket.on('message', (data) => {
-    console.log('Message received:', data);
-    socket.emit('message', { echo: data });
+  socket.on("ping", () => {
+    socket.emit("pong", { at: new Date().toISOString() });
   });
 
-  socket.on('user:changed', (data) => {
-    console.log('User changed event:', data);
-    io.emit('user:changed', data);
+  socket.on("entity:changed", (payload) => {
+    const normalized = {
+      ...payload,
+      at: payload?.at || new Date().toISOString(),
+    };
+
+    console.log("entity:changed", normalized);
+    io.emit("entity:changed", normalized);
   });
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
   });
 });
 
-const PORT = 3001;
 server.listen(PORT, () => {
   console.log(`Socket.IO server running on http://localhost:${PORT}`);
+  console.log(`Allowed origin: ${CLIENT_ORIGIN}`);
 });
-

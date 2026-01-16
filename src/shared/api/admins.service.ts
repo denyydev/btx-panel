@@ -1,4 +1,3 @@
-// shared/api/admins.service.ts
 import type {
   CreateUserRequest,
   GetUsersParams,
@@ -7,10 +6,16 @@ import type {
   User,
 } from "./users.service";
 
-const API_BASE_URL = "/api";
+const BFF_BASE_URL = "/api";
+const UPSTREAM_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://test-api.live-server.xyz";
 
-const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
+const request = async <T>(
+  baseUrl: string,
+  path: string,
+  init?: RequestInit
+): Promise<T> => {
+  const res = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -42,32 +47,36 @@ const buildQuery = (params?: GetUsersParams) => {
 
 export const adminsApi = {
   getAdmins: async (params?: GetUsersParams): Promise<GetUsersResponse> => {
-    return request<GetUsersResponse>(`/users/admins${buildQuery(params)}`, {
-      method: "GET",
-    });
+    return request<GetUsersResponse>(
+      BFF_BASE_URL,
+      `/users/admins${buildQuery(params)}`,
+      { method: "GET" }
+    );
   },
 
-  // CRUD можно вести через users endpoints
-  // но чтобы было одинаково — делаем через usersApi поведение:
   createAdmin: async (data: CreateUserRequest): Promise<User> => {
-    // гарантируем роль admin
-    return request<User>(`/users/add`, {
+    return request<User>(UPSTREAM_BASE_URL, `/users/add`, {
       method: "POST",
       body: JSON.stringify({ ...data, role: "admin" }),
     });
   },
 
   updateAdmin: async (id: number, data: UpdateUserRequest): Promise<User> => {
-    // гарантируем роль admin, если вдруг кто-то поменяет
-    return request<User>(`/users/${encodeURIComponent(String(id))}`, {
-      method: "PATCH",
-      body: JSON.stringify({ ...data, role: "admin" }),
-    });
+    return request<User>(
+      UPSTREAM_BASE_URL,
+      `/users/${encodeURIComponent(String(id))}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ ...data, role: "admin" }),
+      }
+    );
   },
 
   deleteAdmin: async (id: number): Promise<void> => {
-    await request<unknown>(`/users/${encodeURIComponent(String(id))}`, {
-      method: "DELETE",
-    });
+    await request<unknown>(
+      UPSTREAM_BASE_URL,
+      `/users/${encodeURIComponent(String(id))}`,
+      { method: "DELETE" }
+    );
   },
 };

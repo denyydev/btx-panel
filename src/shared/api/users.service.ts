@@ -60,10 +60,16 @@ export interface UpdateUserRequest {
   image?: string;
 }
 
-const API_BASE_URL = "/api";
+const BFF_BASE_URL = "/api";
+const UPSTREAM_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://test-api.live-server.xyz";
 
-const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
+const request = async <T>(
+  baseUrl: string,
+  path: string,
+  init?: RequestInit
+): Promise<T> => {
+  const res = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -133,20 +139,24 @@ export const usersApi = {
       if (sortBy) qs.set("sortBy", sortBy);
       if (order) qs.set("order", order);
 
-      return request<GetUsersResponse>(`/users/search?${qs.toString()}`, {
-        method: "GET",
-      });
+      return request<GetUsersResponse>(
+        UPSTREAM_BASE_URL,
+        `/users/search?${qs.toString()}`,
+        { method: "GET" }
+      );
     }
 
-    return request<GetUsersResponse>(`/users${buildQuery(params)}`, {
-      method: "GET",
-    });
+    return request<GetUsersResponse>(
+      UPSTREAM_BASE_URL,
+      `/users${buildQuery(params)}`,
+      { method: "GET" }
+    );
   },
 
   createUser: async (data: CreateUserRequest): Promise<User> => {
     const { firstName, lastName } = splitName(data.name);
 
-    return request<User>(`/users/add`, {
+    return request<User>(UPSTREAM_BASE_URL, `/users/add`, {
       method: "POST",
       body: JSON.stringify({
         firstName,
@@ -172,28 +182,35 @@ export const usersApi = {
     if (data.role != null) patch.role = data.role;
     if (data.image != null) patch.image = data.image;
 
-    return request<User>(`/users/${encodeURIComponent(String(id))}`, {
-      method: "PATCH", // можно PUT
-      body: JSON.stringify(patch),
-    });
+    return request<User>(
+      UPSTREAM_BASE_URL,
+      `/users/${encodeURIComponent(String(id))}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      }
+    );
   },
 
   deleteUser: async (id: number): Promise<void> => {
-    await request<unknown>(`/users/${encodeURIComponent(String(id))}`, {
-      method: "DELETE",
-    });
+    await request<unknown>(
+      UPSTREAM_BASE_URL,
+      `/users/${encodeURIComponent(String(id))}`,
+      { method: "DELETE" }
+    );
   },
+
   getUsersWithMetrics: async (
     params?: GetUsersParams
   ): Promise<GetUsersWithMetricsResponse> => {
     const qs = new URLSearchParams();
     if (params?.limit != null) qs.set("limit", String(params.limit));
     if (params?.skip != null) qs.set("skip", String(params.skip));
+
     return request<GetUsersWithMetricsResponse>(
+      BFF_BASE_URL,
       `/users/metrics?${qs.toString()}`,
-      {
-        method: "GET",
-      }
+      { method: "GET" }
     );
   },
 };
