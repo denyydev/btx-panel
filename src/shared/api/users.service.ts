@@ -206,6 +206,7 @@ export const usersApi = {
     const qs = new URLSearchParams();
     if (params?.limit != null) qs.set("limit", String(params.limit));
     if (params?.skip != null) qs.set("skip", String(params.skip));
+    if (params?.search?.trim()) qs.set("search", params.search.trim());
 
     return request<GetUsersWithMetricsResponse>(
       BFF_BASE_URL,

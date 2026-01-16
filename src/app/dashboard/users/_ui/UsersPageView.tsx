@@ -26,9 +26,18 @@ export function UsersPageView(props: any) {
     );
   }
 
+  // если вообще нет данных — показываем спиннер
+  if (query.isLoading && !query.data) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="">
+      <div>
         {toastMessage && (
           <div
             className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg ${
@@ -42,23 +51,11 @@ export function UsersPageView(props: any) {
         )}
 
         <div className="lg:hidden">
-          {query.isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <Spinner size="lg" />
-            </div>
-          ) : (
-            <UsersMobileList {...props} />
-          )}
+          <UsersMobileList {...props} />
         </div>
 
         <div className="hidden lg:block">
-          {query.isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <Spinner size="lg" />
-            </div>
-          ) : (
-            <UsersDesktopTable {...props} />
-          )}
+          <UsersDesktopTable {...props} />
         </div>
       </div>
 

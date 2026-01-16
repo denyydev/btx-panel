@@ -1,6 +1,7 @@
 "use client";
 
 import type { User } from "@/shared/api/users.service";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useSocket } from "@/shared/hooks/useSocket";
 import {
   useCreateUser,
@@ -31,10 +32,14 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50] as const;
 export function useUsersPage() {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(8);
+
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: "name",
     direction: "asc",
   });
+
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 400);
 
   const {
     isOpen: isCreateOpen,
@@ -82,6 +87,7 @@ export function useUsersPage() {
     limit: rowsPerPage,
     skip,
     sort,
+    search: debouncedSearch?.trim() ? debouncedSearch.trim() : undefined,
   } as any);
 
   const createUser = useCreateUser();
@@ -224,6 +230,11 @@ export function useUsersPage() {
     setPage(1);
   };
 
+  const onSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
   const avatarSrcCreate = "";
   const avatarNameCreate = (formData.name || "User").trim();
   const avatarSrcEdit = (selectedUser as any)?.image || "";
@@ -241,6 +252,10 @@ export function useUsersPage() {
     onPageSizeChange,
     sortDescriptor,
     setSortDescriptor,
+
+    search,
+    onSearchChange,
+
     selectedUser,
     setSelectedUser,
     formData,

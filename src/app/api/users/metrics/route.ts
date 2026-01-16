@@ -28,7 +28,6 @@ type UpPostCommentsResponse = {
 const toNum = (v: unknown) =>
   typeof v === "number" && Number.isFinite(v) ? v : 0;
 
-// простое ограничение параллелизма (чтоб не DDOS-ить апи)
 async function mapLimit<T, R>(
   arr: T[],
   limit: number,
@@ -50,27 +49,53 @@ async function mapLimit<T, R>(
   return ret;
 }
 
+const norm = (v: unknown) =>
+  String(v ?? "")
+    .toLowerCase()
+    .trim();
+
+const matchesName = (u: any, search: string) => {
+  const q = norm(search);
+  if (!q) return true;
+  const full = `${u?.firstName ?? ""} ${u?.lastName ?? ""}`.toLowerCase();
+  return full.includes(q);
+};
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const limit = searchParams.get("limit") ?? "10";
-  const skip = searchParams.get("skip") ?? "0";
+
+  const limit = Number(searchParams.get("limit") ?? "10");
+  const skip = Number(searchParams.get("skip") ?? "0");
+  const search = (searchParams.get("search") ?? "").trim();
+
+  const upstreamLimit = 200;
 
   const usersRes = await fetch(
-    `${UPSTREAM}/users?limit=${limit}&skip=${skip}`,
-    { cache: "no-store" }
+    `${UPSTREAM}/users?limit=${upstreamLimit}&skip=0`,
+    {
+      cache: "no-store",
+    }
   );
-  if (!usersRes.ok)
+
+  if (!usersRes.ok) {
     return NextResponse.json(
       { message: "Upstream users failed" },
       { status: 502 }
     );
+  }
 
   const usersJson = (await usersRes.json()) as UpUsersResponse;
 
-  const enriched = await mapLimit(usersJson.users, 6, async (u) => {
+  const filtered = (usersJson.users || []).filter((u) =>
+    matchesName(u, search)
+  );
+
+  const total = filtered.length;
+  const pageUsers = filtered.slice(skip, skip + limit);
+
+  const enriched = await mapLimit(pageUsers, 6, async (u) => {
     const userId = u.id;
 
-    // 1) посты юзера
     const postsRes = await fetch(
       `${UPSTREAM}/posts/user/${encodeURIComponent(
         String(userId)
@@ -88,7 +113,6 @@ export async function GET(req: Request) {
       0
     );
 
-    // 2) комменты по каждому посту (берём только total)
     const commentTotals = await mapLimit(postsJson.posts, 8, async (p) => {
       const cRes = await fetch(`${UPSTREAM}/posts/${p.id}/comments`, {
         cache: "no-store",
@@ -105,8 +129,8 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     users: enriched,
-    total: usersJson.total,
-    skip: usersJson.skip,
-    limit: usersJson.limit,
+    total,
+    skip,
+    limit,
   });
 }

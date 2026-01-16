@@ -189,5 +189,6 @@ export const useUsersWithMetricsQuery = (params?: GetUsersParams) => {
     queryKey: ["users", "metrics", params],
     queryFn: () => usersApi.getUsersWithMetrics(params),
     staleTime: 30 * 1000,
+    placeholderData: (prev) => prev,
   });
 };
