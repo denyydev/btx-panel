@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/react";
+import { PlusCircle } from "lucide-react";
 import {
   formatBirth,
   genderLabel,
@@ -56,6 +57,7 @@ export function UsersDesktopTable(props: any) {
         <Button
           color="primary"
           className="h-12 px-6 rounded-[12px] text-[16px] leading-6 font-normal shrink-0"
+          startContent={<PlusCircle className="text-[16px]" />}
           onPress={actions.openCreateModal}
         >
           Добавить пользователя
@@ -69,14 +71,8 @@ export function UsersDesktopTable(props: any) {
       />
 
       <AppTable
-        aria-label="Users table"
+        ariaLabel="Users table"
         className="w-full table-auto"
-        classNames={{
-          thead: "bg-[#FAFAFA]",
-          th: "h-[44px] bg-[#FAFAFA] px-6 text-[14px] leading-5 font-semibold text-[#71717A] whitespace-nowrap",
-          td: "h-[64px] px-6 border-b border-[#E4E4E7] text-[16px] leading-6 font-normal text-[#27272A]",
-          tr: "transition-colors hover:bg-[#FAFAFA]",
-        }}
       >
         <TableHeader>
           <TableColumn key="user">Пользователь</TableColumn>
@@ -196,10 +192,11 @@ export function UsersDesktopTable(props: any) {
                         </Button>
                       </DropdownTrigger>
                       <DropdownMenu aria-label="Actions">
-                        <DropdownItem onPress={() => actions.openEditModal(u)}>
+                        <DropdownItem key="edit" onPress={() => actions.openEditModal(u)}>
                           Редактировать
                         </DropdownItem>
                         <DropdownItem
+                          key="delete"
                           className="text-danger"
                           color="danger"
                           onPress={() => actions.openDeleteModal(u)}

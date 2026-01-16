@@ -1,5 +1,4 @@
 "use client";
-
 import { AppPagination } from "@/shared/ui/AppPagination/AppPagination";
 import { AppSearchInput } from "@/shared/ui/AppSearchInput/AppSearchInput";
 import { AppTable } from "@/shared/ui/AppTable/AppTable";
@@ -16,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/react";
+import { PlusCircle } from "lucide-react";
 import { formatBirth, genderLabel, getFullName } from "../_model/mappers";
 
 export function AdminsDesktopTable(props: any) {
@@ -48,6 +48,7 @@ export function AdminsDesktopTable(props: any) {
           color="primary"
           className="h-12 px-6 rounded-[12px] text-[16px] leading-6 font-normal"
           onPress={actions.openCreateModal}
+          startContent={<PlusCircle size={18} strokeWidth={1.75} />}
         >
           Добавить администратора
         </Button>
@@ -60,14 +61,8 @@ export function AdminsDesktopTable(props: any) {
       />
 
       <AppTable
-        aria-label="Admins table"
+        ariaLabel="Admins table"
         className="table-fixed w-full"
-        classNames={{
-          thead: "bg-[#FAFAFA]",
-          th: "h-[44px] bg-[#FAFAFA] text-[14px] leading-5 font-semibold text-[#71717A] px-6",
-          td: "h-[64px] px-6 border-b border-[#E4E4E7] text-[#27272A]",
-          tr: "transition-colors hover:bg-[#FAFAFA]",
-        }}
       >
         <TableHeader>
           <TableColumn key="name" className="w-[594px]">
@@ -82,7 +77,7 @@ export function AdminsDesktopTable(props: any) {
           <TableColumn key="gender" className="w-[80px]">
             Пол
           </TableColumn>
-          <TableColumn key="actions" className="w-[40px]" />
+          <TableColumn key="actions" className="w-[40px]">Действия</TableColumn>
         </TableHeader>
 
         <TableBody emptyContent="Администраторы не найдены">
@@ -153,10 +148,11 @@ export function AdminsDesktopTable(props: any) {
                         </Button>
                       </DropdownTrigger>
                       <DropdownMenu aria-label="Actions">
-                        <DropdownItem onPress={() => actions.openEditModal(u)}>
+                        <DropdownItem key="edit" onPress={() => actions.openEditModal(u)}>
                           Редактировать
                         </DropdownItem>
                         <DropdownItem
+                          key="delete"
                           className="text-danger"
                           color="danger"
                           onPress={() => actions.openDeleteModal(u)}

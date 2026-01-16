@@ -83,7 +83,7 @@ export function AppPagination({
 
   return (
     <div
-      className={`w-full flex items-center justify-between pt-5 pb-10 ${className}`}
+      className={`w-full flex items-center justify-between pt-5 ${className}`}
     >
       <div className="relative flex items-center gap-[15px]">
         <span className="text-[14px] leading-[20px] font-normal text-[#52525B]">

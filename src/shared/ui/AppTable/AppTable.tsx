@@ -24,7 +24,7 @@ export function AppTable({ ariaLabel, children, className }: Props) {
         td: "text-base text-[#27272A] px-6 first:pl-6 last:pr-6 align-middle",
       }}
     >
-      {children}
+      {children as any}
     </Table>
   );
 }

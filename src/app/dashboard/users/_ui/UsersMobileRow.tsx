@@ -92,10 +92,11 @@ export function UsersMobileRow({
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Actions">
-              <DropdownItem onPress={() => onEdit(u)}>
+              <DropdownItem key="edit" onPress={() => onEdit(u)}>
                 Редактировать
               </DropdownItem>
               <DropdownItem
+                key="delete"
                 className="text-danger"
                 color="danger"
                 onPress={() => onDelete(u)}

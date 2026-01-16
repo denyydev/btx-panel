@@ -84,7 +84,7 @@ export default function CommentsPage() {
 
   return (
     <div className="bg-[#E6F1FE] min-h-[calc(100vh-0px)]">
-      <div className="mx-auto w-full max-w-[1472px] px-0 lg:px-20 py-0 lg:py-20">
+      <div className="mx-auto w-full max-w-[1472px] px-0 lg:px-20 py-0">
         <div className="px-5 lg:px-0 pt-6 lg:pt-0">
           <Button
             variant="light"
@@ -158,14 +158,8 @@ export default function CommentsPage() {
 
               <div className="hidden lg:block bg-white rounded-[16px] p-3">
                 <AppTable
-                  aria-label="Comments table"
+                  ariaLabel="Comments table"
                   className="w-full table-fixed"
-                  classNames={{
-                    thead: "bg-[#FAFAFA]",
-                    th: "h-[44px] bg-[#FAFAFA] px-6 text-[14px] leading-5 font-semibold text-[#71717A] whitespace-nowrap",
-                    td: "px-6 border-b border-[#E4E4E7] text-[#27272A]",
-                    tr: "transition-colors hover:bg-[#FAFAFA]",
-                  }}
                 >
                   <TableHeader>
                     <TableColumn key="body">Комментарий</TableColumn>

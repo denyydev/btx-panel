@@ -30,7 +30,7 @@ export const useUpdateUser = () => {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateUserRequest }) =>
-      usersApi.updateUser(id, data),
+      usersApi.updateUser(Number(id), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
@@ -41,7 +41,7 @@ export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => usersApi.deleteUser(id),
+    mutationFn: (id: string) => usersApi.deleteUser(Number(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },

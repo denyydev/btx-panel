@@ -68,7 +68,7 @@ export interface GetPostsTagsResponse {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
-const parseSort = (sort?: string) => {
+const parseSort = (sort?: string): { sortBy: string; order: "asc" | "desc" } | null => {
   if (!sort) return null;
   const [sortByRaw, orderRaw] = sort.split(":");
   const sortBy = sortByRaw?.trim();
@@ -88,7 +88,7 @@ const buildQuery = (
   if (params.limit != null) qs.set("limit", String(params.limit));
   if (params.skip != null) qs.set("skip", String(params.skip));
   if (params.sortBy) qs.set("sortBy", params.sortBy);
-  if (params.order) qs.set("order", params.order);
+  if (params.order === "asc" || params.order === "desc") qs.set("order", params.order);
   const s = qs.toString();
   return s ? `?${s}` : "";
 };

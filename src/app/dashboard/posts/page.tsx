@@ -91,7 +91,7 @@ export default function PostsPage() {
 
   return (
     <div className="bg-[#E6F1FE] min-h-[calc(100vh-0px)]">
-      <div className="mx-auto w-full max-w-[1472px] px-0 lg:px-20 py-0 lg:py-20">
+      <div className="mx-auto w-full max-w-[1472px]">
         <div className="px-5 lg:px-0 pt-6 lg:pt-0">
           <div className="flex flex-col items-start gap-3 lg:gap-5">
             <h1 className="text-[20px] leading-7 lg:text-[36px] lg:leading-10 font-semibold text-[#11181C]">
@@ -198,7 +198,7 @@ export default function PostsPage() {
               </div>
 
               <div className="hidden lg:block">
-                <AppTable aria-label="Posts table">
+                <AppTable ariaLabel="Posts table">
                   <TableHeader>
                     <TableColumn key="id">ID</TableColumn>
                     <TableColumn key="title">Пост</TableColumn>
@@ -206,7 +206,7 @@ export default function PostsPage() {
                     <TableColumn key="views">Просмотры</TableColumn>
                     <TableColumn key="likes">Лайки</TableColumn>
                     <TableColumn key="comments">Комментарии</TableColumn>
-                    <TableColumn key="actions" className="w-12" />
+                    <TableColumn key="actions" className="w-12">Действия</TableColumn>
                   </TableHeader>
 
                   <TableBody
