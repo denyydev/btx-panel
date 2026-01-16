@@ -3,7 +3,7 @@
 import { useAuthMe } from "@/shared/hooks/useAuth";
 import { useSocket } from "@/shared/hooks/useSocket";
 import { useAuthStore } from "@/shared/store/auth.store";
-import { Sidebar } from "@/shared/ui/Sidebar";
+import { Sidebar } from "@/shared/ui/Sidebar/Sidebar";
 import Cookies from "js-cookie";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
