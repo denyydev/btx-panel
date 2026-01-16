@@ -9,10 +9,11 @@ import {
 } from "@/shared/hooks/useAdmins";
 import { useSocket } from "@/shared/hooks/useSocket";
 import { AppPagination } from "@/shared/ui/AppPagination/AppPagination";
+import { AppSearchInput } from "@/shared/ui/AppSearchInput/AppSearchInput";
+import { AppTable } from "@/shared/ui/AppTable/AppTable";
 import {
   Avatar,
   Button,
-  Chip,
   Dropdown,
   DropdownItem,
   DropdownMenu,
@@ -23,10 +24,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Select,
-  SelectItem,
   Spinner,
-  Table,
   TableBody,
   TableCell,
   TableColumn,
@@ -64,20 +62,6 @@ const genderLabel = (v: unknown) => {
   return String(v);
 };
 
-const roleLabel = (role: unknown) => {
-  const r = String(role || "user");
-  if (r === "admin") return "Администратор";
-  if (r === "moderator") return "Модератор";
-  return "Пользователь";
-};
-
-const roleColor = (role: unknown) => {
-  const r = String(role || "user");
-  if (r === "admin") return "primary" as const;
-  if (r === "moderator") return "secondary" as const;
-  return "default" as const;
-};
-
 const toIsoDateInput = (value: unknown) => {
   if (!value) return "";
   const d = new Date(String(value));
@@ -87,6 +71,103 @@ const toIsoDateInput = (value: unknown) => {
   const yyyy = d.getFullYear();
   return `${yyyy}-${mm}-${dd}`;
 };
+
+function AdminMobileRow({
+  u,
+  onEdit,
+  onDelete,
+}: {
+  u: any;
+  onEdit: (u: any) => void;
+  onDelete: (u: any) => void;
+}) {
+  const fullName =
+    u?.name || [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim();
+
+  const birth = formatBirth(u?.birthDate);
+  const birthDate = birth.split(" ")[0];
+  const birthAge = birth.match(/\((.*?)\)/)?.[0] ?? "";
+
+  return (
+    <div className="bg-white border-b border-[#E4E4E7] px-5 py-3">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between gap-5">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <Avatar
+                src={u?.image}
+                name={fullName || "User"}
+                className="w-5 h-5"
+              />
+              <div className="text-[16px] leading-6 font-semibold text-[#27272A] truncate">
+                {fullName || "-"}
+              </div>
+            </div>
+
+            <div className="mt-2 text-[14px] leading-5 font-normal text-[#338EF7] truncate">
+              {u?.email ? (
+                <a href={`mailto:${u.email}`} className="hover:underline">
+                  {u.email}
+                </a>
+              ) : (
+                "-"
+              )}
+            </div>
+          </div>
+
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Button
+                isIconOnly
+                variant="light"
+                className="w-6 h-6 p-0 bg-transparent"
+              >
+                ⋯
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Actions">
+              <DropdownItem onPress={() => onEdit(u)}>
+                Редактировать
+              </DropdownItem>
+              <DropdownItem
+                className="text-danger"
+                color="danger"
+                onPress={() => onDelete(u)}
+              >
+                Удалить
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+
+        <div className="flex items-start gap-2">
+          <div className="w-[170px]">
+            <div className="text-[12px] leading-4 font-normal text-[#52525B]">
+              Дата рождения
+            </div>
+            <div className="flex items-baseline gap-1">
+              <div className="text-[14px] leading-5 font-normal text-[#27272A]">
+                {birthDate}
+              </div>
+              <div className="text-[14px] leading-5 font-normal text-[#52525B]">
+                {birthAge}
+              </div>
+            </div>
+          </div>
+
+          <div className="w-[64px]">
+            <div className="text-[12px] leading-4 font-normal text-[#52525B]">
+              Пол
+            </div>
+            <div className="text-[14px] leading-5 font-normal text-[#27272A]">
+              {genderLabel(u?.gender)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminsPage() {
   const [page, setPage] = useState(1);
@@ -340,190 +421,230 @@ export default function AdminsPage() {
           </div>
         )}
 
-        <div className="flex justify-between items-center gap-4">
-          <Input
-            placeholder="Поиск по имени или email..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="max-w-xs"
-            variant="bordered"
-          />
-          <Button color="primary" onPress={openCreateModal}>
-            Добавить администратора
-          </Button>
-        </div>
+        {/* MOBILE */}
+        <div className="lg:hidden">
+          <div className="px-5 pt-5 pb-4">
+            <h1 className="text-[20px] leading-7 font-semibold text-[#11181C]">
+              Администраторы
+            </h1>
+            <p className="mt-1 text-[14px] leading-5 font-normal text-[#3F3F46]">
+              Управление администраторами системы
+            </p>
 
-        {adminsQ.isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Spinner size="lg" />
-          </div>
-        ) : (
-          <>
-            <Table aria-label="Admins table">
-              <TableHeader>
-                <TableColumn
-                  key="name"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setSortDescriptor((prev) => ({
-                      column: "name",
-                      direction:
-                        prev.column === "name" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }));
-                  }}
-                >
-                  Пользователь{" "}
-                  {sortDescriptor.column === "name" &&
-                    (sortDescriptor.direction === "asc" ? "↑" : "↓")}
-                </TableColumn>
+            <Button
+              color="primary"
+              className="mt-3 w-full h-10 rounded-[12px] text-[14px] leading-5 font-normal"
+              onPress={openCreateModal}
+            >
+              Добавить администратора
+            </Button>
 
-                <TableColumn
-                  key="email"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setSortDescriptor((prev) => ({
-                      column: "email",
-                      direction:
-                        prev.column === "email" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }));
-                  }}
-                >
-                  Email{" "}
-                  {sortDescriptor.column === "email" &&
-                    (sortDescriptor.direction === "asc" ? "↑" : "↓")}
-                </TableColumn>
-
-                <TableColumn
-                  key="birthDate"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setSortDescriptor((prev) => ({
-                      column: "birthDate",
-                      direction:
-                        prev.column === "birthDate" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }));
-                  }}
-                >
-                  Дата рождения{" "}
-                  {sortDescriptor.column === "birthDate" &&
-                    (sortDescriptor.direction === "asc" ? "↑" : "↓")}
-                </TableColumn>
-
-                <TableColumn key="gender">Пол</TableColumn>
-                <TableColumn key="role">Роль</TableColumn>
-                <TableColumn key="actions" className="w-12" />
-              </TableHeader>
-
-              <TableBody emptyContent="Администраторы не найдены">
-                {rows.map((u: any) => {
-                  const fullName =
-                    u?.name ||
-                    [u?.firstName, u?.lastName]
-                      .filter(Boolean)
-                      .join(" ")
-                      .trim();
-                  return (
-                    <TableRow key={u.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar
-                            src={u?.image}
-                            name={fullName || "User"}
-                            className="shrink-0"
-                          />
-                          <span className="font-medium">{fullName || "-"}</span>
-                        </div>
-                      </TableCell>
-
-                      <TableCell>
-                        {u?.email ? (
-                          <a
-                            href={`mailto:${u.email}`}
-                            className="text-primary hover:underline"
-                          >
-                            {u.email}
-                          </a>
-                        ) : (
-                          "-"
-                        )}
-                      </TableCell>
-
-                      <TableCell>{formatBirth(u?.birthDate)}</TableCell>
-                      <TableCell>{genderLabel(u?.gender)}</TableCell>
-
-                      <TableCell>
-                        <Chip
-                          color={roleColor("admin")}
-                          variant="flat"
-                          size="sm"
-                        >
-                          {roleLabel("admin")}
-                        </Chip>
-                      </TableCell>
-
-                      <TableCell>
-                        <Dropdown placement="bottom-end">
-                          <DropdownTrigger>
-                            <Button isIconOnly size="sm" variant="light">
-                              ⋯
-                            </Button>
-                          </DropdownTrigger>
-                          <DropdownMenu aria-label="Actions">
-                            <DropdownItem onPress={() => openEditModal(u)}>
-                              Редактировать
-                            </DropdownItem>
-                            <DropdownItem
-                              className="text-danger"
-                              color="danger"
-                              onPress={() => openDeleteModal(u)}
-                            >
-                              Удалить
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </Dropdown>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-
-            <div className="flex items-center justify-between">
-              <Select
-                selectedKeys={[String(rowsPerPage)]}
-                onSelectionChange={(keys) => {
-                  const value = Array.from(keys)[0] as string | undefined;
-                  if (!value) return;
-                  setRowsPerPage(Number(value));
+            <div className="mt-5">
+              <AppSearchInput
+                value={search}
+                onChange={(v) => {
+                  setSearch(v);
                   setPage(1);
                 }}
-                className="w-32"
-                variant="bordered"
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {adminsQ.isLoading ? (
+            <div className="flex justify-center items-center h-40">
+              <Spinner size="lg" />
+            </div>
+          ) : (
+            <div className="pb-[80px]">
+              {rows.length ? (
+                rows.map((u: any) => (
+                  <AdminMobileRow
+                    key={u.id}
+                    u={u}
+                    onEdit={(x) => openEditModal(x)}
+                    onDelete={(x) => openDeleteModal(x)}
+                  />
+                ))
+              ) : (
+                <div className="px-5 py-6 text-[14px] text-[#52525B]">
+                  Администраторы не найдены
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* DESKTOP */}
+        <div className="hidden lg:block space-y-6">
+          <div className="flex items-start justify-between gap-10">
+            <div className="flex flex-col gap-5">
+              <h1 className="text-[36px] leading-10 font-semibold text-[#11181C]">
+                Администраторы
+              </h1>
+              <p className="text-[18px] leading-7 font-normal text-[#3F3F46]">
+                Управление администраторами системы
+              </p>
+            </div>
+
+            <Button
+              color="primary"
+              className="h-12 px-6 rounded-[12px] text-[16px] leading-6 font-normal"
+              onPress={openCreateModal}
+            >
+              Добавить администратора
+            </Button>
+          </div>
+
+          <AppSearchInput
+            value={search}
+            onChange={(v) => {
+              setSearch(v);
+              setPage(1);
+            }}
+            className="max-w-[746px]"
+          />
+
+          {adminsQ.isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <Spinner size="lg" />
+            </div>
+          ) : (
+            <>
+              <AppTable
+                aria-label="Admins table"
+                className="table-fixed w-full"
+                classNames={{
+                  thead: "bg-[#FAFAFA]",
+                  th: "h-[44px] bg-[#FAFAFA] text-[14px] leading-5 font-semibold text-[#71717A] px-6",
+                  td: "h-[64px] px-6 border-b border-[#E4E4E7] text-[#27272A]",
+                  tr: "transition-colors hover:bg-[#FAFAFA]",
+                }}
               >
-                {ROWS_PER_PAGE_OPTIONS.map((option) => (
-                  <SelectItem key={String(option)}>{option}</SelectItem>
-                ))}
-              </Select>
+                <TableHeader>
+                  <TableColumn key="name" className="w-[594px]">
+                    Пользователь
+                  </TableColumn>
+                  <TableColumn key="email" className="w-[240px]">
+                    Email
+                  </TableColumn>
+                  <TableColumn key="birthDate" className="w-[150px]">
+                    Дата рождения
+                  </TableColumn>
+                  <TableColumn key="gender" className="w-[80px]">
+                    Пол
+                  </TableColumn>
+                  <TableColumn key="actions" className="w-[40px]" />
+                </TableHeader>
+
+                <TableBody emptyContent="Администраторы не найдены">
+                  {rows.map((u: any) => {
+                    const fullName =
+                      u?.name ||
+                      [u?.firstName, u?.lastName]
+                        .filter(Boolean)
+                        .join(" ")
+                        .trim();
+
+                    const birth = formatBirth(u?.birthDate);
+
+                    return (
+                      <TableRow
+                        key={u.id}
+                        className="transition-colors hover:bg-[#FAFAFA]"
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-2 w-[594px]">
+                            <Avatar
+                              src={u?.image}
+                              name={fullName || "User"}
+                              className="w-6 h-6"
+                            />
+                            <span className="text-[16px] leading-6 font-semibold text-[#27272A] truncate">
+                              {fullName || "-"}
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
+                          <div className="w-[240px] truncate">
+                            {u?.email ? (
+                              <a
+                                href={`mailto:${u.email}`}
+                                className="text-[16px] leading-6 font-normal text-[#338EF7] hover:underline"
+                              >
+                                {u.email}
+                              </a>
+                            ) : (
+                              "-"
+                            )}
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
+                          <div className="w-[150px] flex items-baseline gap-1">
+                            <span className="text-[16px] leading-6 font-normal text-[#27272A]">
+                              {birth.split(" ")[0]}
+                            </span>
+                            <span className="text-[14px] leading-5 font-normal text-[#52525B]">
+                              {birth.match(/\((.*?)\)/)?.[0] ?? ""}
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
+                          <div className="w-[80px] text-[16px] leading-6 font-normal text-[#27272A]">
+                            {genderLabel(u?.gender)}
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
+                          <div className="w-[40px] flex justify-end">
+                            <Dropdown placement="bottom-end">
+                              <DropdownTrigger>
+                                <Button
+                                  isIconOnly
+                                  className="w-10 h-10 rounded-[12px] bg-transparent data-[hover=true]:bg-[#E4E4E7]"
+                                  variant="light"
+                                >
+                                  ⋯
+                                </Button>
+                              </DropdownTrigger>
+                              <DropdownMenu aria-label="Actions">
+                                <DropdownItem onPress={() => openEditModal(u)}>
+                                  Редактировать
+                                </DropdownItem>
+                                <DropdownItem
+                                  className="text-danger"
+                                  color="danger"
+                                  onPress={() => openDeleteModal(u)}
+                                >
+                                  Удалить
+                                </DropdownItem>
+                              </DropdownMenu>
+                            </Dropdown>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </AppTable>
 
               <AppPagination
                 page={page}
                 totalPages={pages}
                 onChange={setPage}
                 pageSize={rowsPerPage}
-                onPageSizeClick={() => {}}
+                pageSizeOptions={ROWS_PER_PAGE_OPTIONS}
+                onPageSizeChange={(v) => {
+                  setRowsPerPage(v);
+                  setPage(1);
+                }}
               />
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       <Modal

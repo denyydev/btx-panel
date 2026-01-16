@@ -9,6 +9,7 @@ import {
   useUsersWithMetricsQuery,
 } from "@/shared/hooks/useUsers";
 import { AppPagination } from "@/shared/ui/AppPagination/AppPagination";
+import { AppTable } from "@/shared/ui/AppTable/AppTable";
 import {
   Avatar,
   Button,
@@ -24,7 +25,6 @@ import {
   ModalFooter,
   ModalHeader,
   Spinner,
-  Table,
   TableBody,
   TableCell,
   TableColumn,
@@ -96,7 +96,7 @@ const toIsoDateInput = (value: unknown) => {
 
 export default function UsersPage() {
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(8);
   const [sortDescriptor, setSortDescriptor] = useState<{
     column: string;
     direction: "asc" | "desc";
@@ -362,7 +362,7 @@ export default function UsersPage() {
           </div>
         ) : (
           <>
-            <Table aria-label="Users table">
+            <AppTable aria-label="Users table">
               <TableHeader>
                 <TableColumn key="user">Пользователь</TableColumn>
                 <TableColumn key="email">Email</TableColumn>
@@ -455,7 +455,7 @@ export default function UsersPage() {
                   );
                 }}
               </TableBody>
-            </Table>
+            </AppTable>
 
             <AppPagination
               page={page}

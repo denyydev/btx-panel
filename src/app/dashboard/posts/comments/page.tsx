@@ -124,9 +124,13 @@ export default function CommentsPage() {
             <AppPagination
               page={page}
               totalPages={pages}
-              totalItems={total}
-              pageSize={limit}
               onChange={setPage}
+              pageSize={rowsPerPage}
+              pageSizeOptions={ROWS_PER_PAGE_OPTIONS}
+              onPageSizeChange={(v) => {
+                setRowsPerPage(v);
+                setPage(1);
+              }}
             />
           </div>
         </>

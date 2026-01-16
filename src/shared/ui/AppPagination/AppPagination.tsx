@@ -78,12 +78,12 @@ export function AppPagination({
   const btnBase =
     "h-10 border-2 border-[#006FEE] text-[14px] leading-[20px] font-normal select-none";
   const btnGhost =
-    "bg-white text-[#006FEE] hover:bg-[#CCE3FD] active:bg-[#CCE3FD]";
+    "bg-transparent text-[#006FEE] hover:bg-[#CCE3FD] active:bg-[#CCE3FD] focus:bg-transparent";
   const btnActive = "bg-[#006FEE] text-white";
 
   return (
     <div
-      className={`w-full flex items-center justify-between px-20 pt-5 pb-10 ${className}`}
+      className={`w-full flex items-center justify-between pt-5 pb-10 ${className}`}
     >
       <div className="relative flex items-center gap-[15px]">
         <span className="text-[14px] leading-[20px] font-normal text-[#52525B]">
