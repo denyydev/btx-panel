@@ -109,7 +109,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-10 sm:h-12 rounded-[12px] bg-[#006FEE] text-white text-[14px] sm:text-[16px]"
+              className="w-full h-10 sm:h-12 rounded-[12px] bg-[#006FEE] text-white text-[14px] sm:text-[16px] !text-white"
               isLoading={loginMutation.isPending}
             >
               Войти
