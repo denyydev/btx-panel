@@ -1,4 +1,3 @@
-// src/app/dashboard/admins/_ui/AdminDeleteModal.tsx
 "use client";
 
 import {

@@ -1,4 +1,3 @@
-// src/app/dashboard/users/_ui/UsersPageView.tsx
 "use client";
 
 import { Spinner } from "@heroui/react";
@@ -26,7 +25,6 @@ export function UsersPageView(props: any) {
     );
   }
 
-  // если вообще нет данных — показываем спиннер
   if (query.isLoading && !query.data) {
     return (
       <div className="flex justify-center items-center h-64">

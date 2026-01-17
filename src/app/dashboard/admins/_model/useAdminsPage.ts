@@ -1,4 +1,3 @@
-// src/app/dashboard/admins/_model/useAdminsPage.ts
 "use client";
 
 import type { User } from "@/shared/api/users.service";

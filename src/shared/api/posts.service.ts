@@ -83,10 +83,8 @@ const mapSort = (
   if (field === "id") return { sortBy: "id", order };
   if (field === "views") return { sortBy: "views", order };
 
-  // апстрим обычно не умеет nested sort reactions.likes
   if (field === "likes") return { clientField: "likes", order };
 
-  // comments count вообще нет в posts list
   if (field === "comments") return { clientField: "comments", order };
 
   return {};
@@ -157,7 +155,6 @@ export const postsApi = {
 
     const res = await request<GetPostsResponse>(base, { method: "GET" });
 
-    // client fallback сортировка только по текущей странице
     if (clientField === "likes") {
       const dir = order === "desc" ? -1 : 1;
       return {
@@ -168,7 +165,6 @@ export const postsApi = {
       };
     }
 
-    // comments — пока просто вернем как есть (отсортируем позже, когда будут counts)
     return res;
   },
 

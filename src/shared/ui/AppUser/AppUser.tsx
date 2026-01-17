@@ -16,7 +16,6 @@ const AppUser = () => {
 
   const handleLogout = async () => {
     await logout();
-    // Используем window.location для принудительного редиректа
     window.location.href = "/login";
   };
 

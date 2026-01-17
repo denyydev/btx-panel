@@ -7,10 +7,7 @@ import Cookies from "js-cookie";
 
 const JWT_COOKIE_NAME = "auth_token";
 
-// апдейт юзера через твой usersApi (upstream PATCH /users/:id)
 import { usersApi, type UpdateUserRequest } from "@/shared/api/users.service";
-
-// Маппинг из полей профиля в UpdateUserRequest (у тебя там name/email/role/birthDate/image)
 type ProfileForm = {
   firstName: string;
   lastName: string;
@@ -44,7 +41,6 @@ export const useUpdateProfile = () => {
         Cookies.get(JWT_COOKIE_NAME) || null,
       ]);
 
-      // оптимистично обновим store (чтобы хедер/виджет тоже обновился)
       const optimistic: AuthUser = {
         ...(user as any),
         firstName: data.firstName,
@@ -73,8 +69,6 @@ export const useUpdateProfile = () => {
     },
 
     onSuccess: (updated) => {
-      // usersApi.updateUser вернёт User из users.service,
-      // надо привести к AuthUser формату (минимально)
       const current = useAuthStore.getState().user;
       if (!current) return;
 

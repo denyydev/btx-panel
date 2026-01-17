@@ -46,7 +46,6 @@ export const useAuthMe = () => {
   const setUser = useAuthStore((s) => s.setUser);
   const setToken = useAuthStore((s) => s.setToken);
 
-  // Инициализируем token в store из cookie при первом рендере
   useEffect(() => {
     if (cookieToken && !storeToken) {
       setToken(cookieToken);

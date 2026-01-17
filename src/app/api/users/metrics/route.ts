@@ -1,4 +1,3 @@
-// app/api/users/metrics/route.ts
 import { NextResponse } from "next/server";
 
 const UPSTREAM =

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { socket } from "../../providers/socket-provider"; // поправь путь под свой проект
+import { socket } from "../../providers/socket-provider";
 import type { GetUsersResponse, User } from "../api/users.service";
 import {
   CreateUserRequest,

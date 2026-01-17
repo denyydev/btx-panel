@@ -37,24 +37,19 @@ export default function DashboardLayout({
   }, [data, userInStore, setUser]);
 
   useEffect(() => {
-    // Проверяем наличие токена в cookie или store
     const cookieToken = Cookies.get(JWT_COOKIE_NAME) || null;
     const hasToken = cookieToken || token;
 
-    // Если нет токена и загрузка завершена - редирект на логин
     if (!hasToken && !isLoading) {
       router.push("/login");
       return;
     }
 
-    // Если ошибка при загрузке пользователя - разлогиниваем
     if (!isLoading && isError) {
       logoutStore();
       router.push("/login");
     }
   }, [token, isLoading, isError, router, logoutStore]);
-
-  // Показываем loading пока загружаем данные или пока нет токена
   const cookieToken = Cookies.get(JWT_COOKIE_NAME) || null;
   if ((!token && !cookieToken) || isLoading) return null;
 
@@ -71,7 +66,6 @@ export default function DashboardLayout({
 
   const logout = async () => {
     await logoutStore();
-    // Используем window.location для принудительного редиректа
     window.location.href = "/login";
   };
 
@@ -118,7 +112,6 @@ export default function DashboardLayout({
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="w-8 h-8 rounded-full bg-[#A1A1AA] overflow-hidden shrink-0">
                   {avatar && (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={avatar}
                       alt=""

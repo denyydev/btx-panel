@@ -1,4 +1,3 @@
-// src/app/dashboard/users/_ui/UsersDesktopTable.tsx
 "use client";
 
 import { AppPagination } from "@/shared/ui/AppPagination/AppPagination";

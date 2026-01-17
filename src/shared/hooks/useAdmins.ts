@@ -1,4 +1,4 @@
-import { socket } from "@/providers/socket-provider"; // поправь под свой путь
+import { socket } from "@/providers/socket-provider";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminsApi } from "../api/admins.service";
 import type {
