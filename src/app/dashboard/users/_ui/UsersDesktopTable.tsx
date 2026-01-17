@@ -59,7 +59,7 @@ export function UsersDesktopTable(props: any) {
 
         <Button
           color="primary"
-          className="h-12 px-6 rounded-[12px] text-[16px] leading-6 font-normal shrink-0"
+          className="h-12 px-6 rounded-[12px] text-[16px] leading-6 font-normal shrink-0 text-white!"
           startContent={<PlusCircle className="text-[16px]" />}
           onPress={actions.openCreateModal}
         >

@@ -38,7 +38,7 @@ const AppUser = () => {
           </div>
           <Link
             href="/dashboard/me"
-            className="truncate text-[14px] leading-[20px] text-[#006FEE] hover:underline"
+            className="truncate text-[14px] leading-[20px] text-[#006FEE] hover:underline text-blue-700!"
           >
             {user?.username ? `@${user.username}` : "—"}
           </Link>
@@ -51,7 +51,7 @@ const AppUser = () => {
         className="flex h-10 w-full items-center justify-center gap-2 rounded-[14px] bg-[#CCE3FD] px-4 text-[14px] leading-[20px] text-[#006FEE]"
       >
         <LogOut size={18} strokeWidth={1.5} />
-        Выйти
+        Выход
       </button>
     </div>
   );

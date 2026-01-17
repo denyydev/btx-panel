@@ -19,7 +19,7 @@ export function UsersMobileList(props: any) {
 
         <Button
           color="primary"
-          className="mt-3 w-full h-10 rounded-[12px] text-[14px] leading-5 font-normal"
+          className="mt-3 w-full h-10 rounded-[12px] text-[14px] leading-5 font-normal text-white!"
           onPress={actions.openCreateModal}
         >
           Добавить пользователя

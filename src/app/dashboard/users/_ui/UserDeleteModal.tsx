@@ -47,7 +47,7 @@ export function UserDeleteModal({
           "shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)]",
           "rounded-[32px]",
           "w-[565px] max-w-[calc(100vw-32px)]",
-          "h-[372px] max-h-[calc(100vh-32px)]",
+          "h-[450px] max-h-[calc(100vh-32px)]",
           "overflow-hidden overflow-x-hidden",
           "flex flex-col items-center",
           "px-[60px] py-[60px] gap-[40px]",
@@ -76,11 +76,9 @@ export function UserDeleteModal({
               <ModalBody className="p-0 w-full">
                 <div className="w-full max-w-[445px] flex flex-col items-center gap-[20px]">
                   <p className="w-full min-h-[56px] text-[18px] leading-[28px] font-normal text-[#3F3F46] text-center flex items-center justify-center">
-                    Вы уверены, что хотите удалить пользователя{" "}
-                    <span className="font-semibold text-[#11181C]">{name}</span>
-                    ?
+                    Вы уверены, что хотите удалить пользователя
                   </p>
-
+                  <p className="font-semibold text-[#11181C]">{name}?</p>
                   <p className="w-full h-[28px] text-[18px] leading-[28px] font-normal text-[#3F3F46] text-center flex items-center justify-center">
                     Данное действие отменить невозможно
                   </p>

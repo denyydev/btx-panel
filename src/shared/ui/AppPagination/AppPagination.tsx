@@ -78,15 +78,15 @@ export function AppPagination({
   const btnBase =
     "h-10 border-2 border-[#006FEE] text-[14px] leading-[20px] font-normal select-none";
   const btnGhost =
-    "bg-transparent text-[#006FEE] hover:bg-[#CCE3FD] active:bg-[#CCE3FD] focus:bg-transparent";
-  const btnActive = "bg-[#006FEE] text-white";
+    "bg-transparent !text-[#006FEE] hover:!text-[#006FEE] hover:bg-[#CCE3FD] active:bg-[#CCE3FD] focus:bg-transparent";
+  const btnActive = "bg-[#006FEE] !text-white";
 
   return (
     <div
       className={`w-full flex items-center justify-between pt-5 ${className}`}
     >
       <div className="relative flex items-center gap-[15px]">
-        <span className="text-[14px] leading-[20px] font-normal text-[#52525B]">
+        <span className="text-[14px] leading-[20px] font-normal !text-[#52525B]">
           Показывать на странице
         </span>
 
@@ -95,7 +95,7 @@ export function AppPagination({
           onClick={() => setOpen((v) => !v)}
           className="h-10 inline-flex items-center gap-2"
         >
-          <span className="text-[14px] leading-[20px] font-normal text-[#006FEE]">
+          <span className="text-[14px] leading-[20px] font-normal !text-[#006FEE]">
             {pageSize}
           </span>
           <ChevronDown />
@@ -111,7 +111,7 @@ export function AppPagination({
                   onPageSizeChange?.(opt);
                   setOpen(false);
                 }}
-                className={`w-full px-3 py-2 text-left text-[14px] leading-[20px] ${
+                className={`w-full px-3 py-2 text-left text-[14px] leading-[20px] !text-[#006FEE] ${
                   opt === pageSize ? "bg-[#E6F1FE]" : "hover:bg-[#FAFAFA]"
                 }`}
               >

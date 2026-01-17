@@ -46,7 +46,7 @@ export function AdminsDesktopTable(props: any) {
 
         <Button
           color="primary"
-          className="h-12 px-6 rounded-[12px] text-[16px] leading-6 font-normal"
+          className="h-12 px-6 rounded-[12px] text-[16px] leading-6 font-normal text-white!"
           onPress={actions.openCreateModal}
           startContent={<PlusCircle size={18} strokeWidth={1.75} />}
         >
@@ -60,10 +60,7 @@ export function AdminsDesktopTable(props: any) {
         className="max-w-[746px]"
       />
 
-      <AppTable
-        ariaLabel="Admins table"
-        className="table-fixed w-full"
-      >
+      <AppTable ariaLabel="Admins table" className="table-fixed w-full">
         <TableHeader>
           <TableColumn key="name" className="w-[594px]">
             Пользователь
@@ -77,7 +74,9 @@ export function AdminsDesktopTable(props: any) {
           <TableColumn key="gender" className="w-[80px]">
             Пол
           </TableColumn>
-          <TableColumn key="actions" className="w-[40px]">Действия</TableColumn>
+          <TableColumn key="actions" className="w-[40px]">
+            Действия
+          </TableColumn>
         </TableHeader>
 
         <TableBody emptyContent="Администраторы не найдены">
@@ -148,7 +147,10 @@ export function AdminsDesktopTable(props: any) {
                         </Button>
                       </DropdownTrigger>
                       <DropdownMenu aria-label="Actions">
-                        <DropdownItem key="edit" onPress={() => actions.openEditModal(u)}>
+                        <DropdownItem
+                          key="edit"
+                          onPress={() => actions.openEditModal(u)}
+                        >
                           Редактировать
                         </DropdownItem>
                         <DropdownItem
