@@ -16,6 +16,7 @@ export const usePostsQuery = (params?: GetPostsParams) => {
     queryKey: ["posts", params],
     queryFn: () => postsApi.getPosts(params),
     staleTime: 30 * 1000,
+    placeholderData: (prev) => prev,
   });
 };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { usePostsCommentsCounts, usePostsQuery } from "@/shared/hooks/usePosts";
 import { useUsersQuery } from "@/shared/hooks/useUsers";
 import { AppPagination } from "@/shared/ui/AppPagination/AppPagination";
@@ -20,6 +21,9 @@ import { useMemo, useState } from "react";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50] as const;
 
+type SortKey = "id" | "views" | "likes" | "comments";
+type SortDir = "asc" | "desc";
+
 const authorShort = (u?: any) => {
   if (!u) return "-";
   const last = (u.lastName || "").trim();
@@ -27,19 +31,33 @@ const authorShort = (u?: any) => {
   return `${last} ${first ? first[0] + "." : ""}`.trim();
 };
 
+const nextDir = (dir: SortDir): SortDir => (dir === "asc" ? "desc" : "asc");
+
 export default function PostsPage() {
   const router = useRouter();
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 400);
+
+  const [sortKey, setSortKey] = useState<SortKey>("id");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const skip = (page - 1) * rowsPerPage;
+
+  // server sort только там, где апстрим точно умеет
+  const serverSort =
+    sortKey === "id" || sortKey === "views"
+      ? `${sortKey}:${sortDir}`
+      : undefined;
 
   const postsQ = usePostsQuery({
     limit: rowsPerPage,
     skip,
-    search: search || undefined,
+    search: debouncedSearch.trim() ? debouncedSearch.trim() : undefined,
+    sort: serverSort,
   });
 
   const usersQ = useUsersQuery({ limit: 300, skip: 0 });
@@ -67,13 +85,37 @@ export default function PostsPage() {
     () => rowsWithAuthor.map((p: any) => p.id),
     [rowsWithAuthor]
   );
-
   const commentsCountsQ = usePostsCommentsCounts(postIds);
 
-  const isLoading =
-    postsQ.isLoading ||
-    usersQ.isLoading ||
-    commentsCountsQ.queries.some((q) => q.isLoading);
+  // client-side sort для likes/comments (потому что server не умеет / данных нет в posts list)
+  const sortedRows = useMemo(() => {
+    const rows = [...rowsWithAuthor];
+    const dir = sortDir === "asc" ? 1 : -1;
+
+    if (sortKey === "likes") {
+      rows.sort(
+        (a: any, b: any) =>
+          ((a?.reactions?.likes ?? 0) - (b?.reactions?.likes ?? 0)) * dir
+      );
+    } else if (sortKey === "comments") {
+      rows.sort((a: any, b: any) => {
+        const ac = commentsCountsQ.map[String(a.id)] ?? 0;
+        const bc = commentsCountsQ.map[String(b.id)] ?? 0;
+        return (ac - bc) * dir;
+      });
+    }
+    // id/views на сервере, тут не трогаем
+    return rows;
+  }, [rowsWithAuthor, sortKey, sortDir, commentsCountsQ.map]);
+
+  const isInitialLoading =
+    (postsQ.isLoading && !postsQ.data) || (usersQ.isLoading && !usersQ.data);
+
+  // рефетч — не прячем таблицу, просто оверлей над списком/таблицей
+  const isRefetching =
+    postsQ.isFetching ||
+    usersQ.isFetching ||
+    commentsCountsQ.queries.some((q) => q.isFetching);
 
   const onPageSizeChange = (value: number) => {
     setRowsPerPage(value);
@@ -83,6 +125,21 @@ export default function PostsPage() {
   const onSearchChange = (value: string) => {
     setSearch(value);
     setPage(1);
+  };
+
+  const onSort = (key: SortKey) => {
+    setPage(1);
+    if (sortKey === key) {
+      setSortDir((d) => nextDir(d));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  const sortIcon = (key: SortKey) => {
+    if (sortKey !== key) return "⇅";
+    return sortDir === "asc" ? "↑" : "↓";
   };
 
   if (postsQ.error) {
@@ -111,16 +168,16 @@ export default function PostsPage() {
         </div>
 
         <div className="mt-5 lg:mt-10">
-          {isLoading ? (
+          {isInitialLoading ? (
             <div className="flex justify-center items-center h-64">
               <Spinner size="lg" />
             </div>
           ) : (
             <>
-              <div className="lg:hidden px-0">
-                <div className="rounded-t-[16px] overflow-hidden">
-                  {rowsWithAuthor.length ? (
-                    rowsWithAuthor.map((p: any) => {
+              <div className="lg:hidden px-0 relative">
+                <div className="rounded-t-[16px] overflow-hidden relative">
+                  {sortedRows.length ? (
+                    sortedRows.map((p: any) => {
                       const u = p.user;
                       const name = authorShort(u);
                       const author = name !== "-" ? name : `User ${p.userId}`;
@@ -181,6 +238,12 @@ export default function PostsPage() {
                       Посты не найдены
                     </div>
                   )}
+
+                  {isRefetching && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+                      <Spinner />
+                    </div>
+                  )}
                 </div>
 
                 <div className="px-5 py-4">
@@ -198,71 +261,130 @@ export default function PostsPage() {
               </div>
 
               <div className="hidden lg:block">
-                <AppTable ariaLabel="Posts table">
-                  <TableHeader>
-                    <TableColumn key="id">ID</TableColumn>
-                    <TableColumn key="title">Пост</TableColumn>
-                    <TableColumn key="author">Автор</TableColumn>
-                    <TableColumn key="views">Просмотры</TableColumn>
-                    <TableColumn key="likes">Лайки</TableColumn>
-                    <TableColumn key="comments">Комментарии</TableColumn>
-                    <TableColumn key="actions" className="w-12">Действия</TableColumn>
-                  </TableHeader>
+                <div className="relative">
+                  <AppTable ariaLabel="Posts table">
+                    <TableHeader>
+                      <TableColumn key="id">
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2"
+                          onClick={() => onSort("id")}
+                        >
+                          ID{" "}
+                          <span className="text-xs opacity-70">
+                            {sortIcon("id")}
+                          </span>
+                        </button>
+                      </TableColumn>
 
-                  <TableBody
-                    items={rowsWithAuthor}
-                    emptyContent="Посты не найдены"
-                  >
-                    {(p: any) => {
-                      const u = p.user;
-                      const name = authorShort(u);
-                      const author = name !== "-" ? name : `User ${p.userId}`;
-                      const commentsCount = commentsCountsQ.map[String(p.id)];
+                      <TableColumn key="title">Пост</TableColumn>
+                      <TableColumn key="author">Автор</TableColumn>
 
-                      return (
-                        <TableRow key={p.id}>
-                          <TableCell>{p.id}</TableCell>
+                      <TableColumn key="views">
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2"
+                          onClick={() => onSort("views")}
+                        >
+                          Просмотры{" "}
+                          <span className="text-xs opacity-70">
+                            {sortIcon("views")}
+                          </span>
+                        </button>
+                      </TableColumn>
 
-                          <TableCell>
-                            <div className="max-w-[420px] truncate font-medium">
-                              {p.title || p.name || "-"}
-                            </div>
-                          </TableCell>
+                      <TableColumn key="likes">
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2"
+                          onClick={() => onSort("likes")}
+                        >
+                          Лайки{" "}
+                          <span className="text-xs opacity-70">
+                            {sortIcon("likes")}
+                          </span>
+                        </button>
+                      </TableColumn>
 
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <Avatar
-                                src={u?.image}
-                                name={author}
-                                className="shrink-0"
-                              />
-                              <span className="font-medium">{author}</span>
-                            </div>
-                          </TableCell>
+                      <TableColumn key="comments">
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2"
+                          onClick={() => onSort("comments")}
+                        >
+                          Комментарии{" "}
+                          <span className="text-xs opacity-70">
+                            {sortIcon("comments")}
+                          </span>
+                        </button>
+                      </TableColumn>
 
-                          <TableCell>{p.views ?? "-"}</TableCell>
-                          <TableCell>{p.reactions?.likes ?? "-"}</TableCell>
-                          <TableCell>{commentsCount ?? "-"}</TableCell>
+                      <TableColumn key="actions" className="w-12">
+                        Действия
+                      </TableColumn>
+                    </TableHeader>
 
-                          <TableCell>
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              onPress={() =>
-                                router.push(
-                                  `/dashboard/posts/comments?postId=${p.id}`
-                                )
-                              }
-                            >
-                              →
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }}
-                  </TableBody>
-                </AppTable>
+                    <TableBody
+                      items={sortedRows}
+                      emptyContent="Посты не найдены"
+                    >
+                      {(p: any) => {
+                        const u = p.user;
+                        const name = authorShort(u);
+                        const author = name !== "-" ? name : `User ${p.userId}`;
+                        const commentsCount = commentsCountsQ.map[String(p.id)];
+
+                        return (
+                          <TableRow key={p.id}>
+                            <TableCell>{p.id}</TableCell>
+
+                            <TableCell>
+                              <div className="max-w-[420px] truncate font-medium">
+                                {p.title || p.name || "-"}
+                              </div>
+                            </TableCell>
+
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar
+                                  src={u?.image}
+                                  name={author}
+                                  className="shrink-0"
+                                />
+                                <span className="font-medium">{author}</span>
+                              </div>
+                            </TableCell>
+
+                            <TableCell>{p.views ?? "-"}</TableCell>
+                            <TableCell>{p.reactions?.likes ?? "-"}</TableCell>
+                            <TableCell>{commentsCount ?? "-"}</TableCell>
+
+                            <TableCell>
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                variant="light"
+                                onPress={() =>
+                                  router.push(
+                                    `/dashboard/posts/comments?postId=${p.id}`
+                                  )
+                                }
+                              >
+                                →
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }}
+                    </TableBody>
+                  </AppTable>
+
+                  {isRefetching && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-xl">
+                      <Spinner />
+                    </div>
+                  )}
+                </div>
 
                 <div className="mt-6">
                   <AppPagination

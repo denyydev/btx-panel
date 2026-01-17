@@ -68,7 +68,33 @@ export interface GetPostsTagsResponse {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
-const parseSort = (sort?: string): { sortBy: string; order: "asc" | "desc" } | null => {
+const mapSort = (
+  sort?: string
+): {
+  sortBy?: string;
+  order?: "asc" | "desc";
+  clientField?: "likes" | "comments";
+} => {
+  if (!sort) return {};
+  const [fieldRaw, dirRaw] = sort.split(":");
+  const order = dirRaw?.trim() === "desc" ? "desc" : "asc";
+  const field = (fieldRaw || "").trim();
+
+  if (field === "id") return { sortBy: "id", order };
+  if (field === "views") return { sortBy: "views", order };
+
+  // апстрим обычно не умеет nested sort reactions.likes
+  if (field === "likes") return { clientField: "likes", order };
+
+  // comments count вообще нет в posts list
+  if (field === "comments") return { clientField: "comments", order };
+
+  return {};
+};
+
+const parseSort = (
+  sort?: string
+): { sortBy: string; order: "asc" | "desc" } | null => {
   if (!sort) return null;
   const [sortByRaw, orderRaw] = sort.split(":");
   const sortBy = sortByRaw?.trim();
@@ -88,7 +114,8 @@ const buildQuery = (
   if (params.limit != null) qs.set("limit", String(params.limit));
   if (params.skip != null) qs.set("skip", String(params.skip));
   if (params.sortBy) qs.set("sortBy", params.sortBy);
-  if (params.order === "asc" || params.order === "desc") qs.set("order", params.order);
+  if (params.order === "asc" || params.order === "desc")
+    qs.set("order", params.order);
   const s = qs.toString();
   return s ? `?${s}` : "";
 };
@@ -113,25 +140,36 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
 
 export const postsApi = {
   getPosts: async (params?: GetPostsParams): Promise<GetPostsResponse> => {
-    const sortParsed = parseSort(params?.sort);
+    const { sortBy, order, clientField } = mapSort(params?.sort);
+
     const qs = buildQuery({
       limit: params?.limit,
       skip: params?.skip,
-      sortBy: sortParsed?.sortBy,
-      order: sortParsed?.order,
+      sortBy,
+      order,
     });
 
-    if (params?.search) {
-      const q = encodeURIComponent(params.search);
-      return request<GetPostsResponse>(
-        `/posts/search?q=${q}${qs ? `&${qs.slice(1)}` : ""}`,
-        {
-          method: "GET",
-        }
-      );
+    const base = params?.search?.trim()
+      ? `/posts/search?q=${encodeURIComponent(params.search.trim())}${
+          qs ? `&${qs.slice(1)}` : ""
+        }`
+      : `/posts${qs}`;
+
+    const res = await request<GetPostsResponse>(base, { method: "GET" });
+
+    // client fallback сортировка только по текущей странице
+    if (clientField === "likes") {
+      const dir = order === "desc" ? -1 : 1;
+      return {
+        ...res,
+        posts: [...res.posts].sort(
+          (a, b) => (a.reactions?.likes - b.reactions?.likes) * dir
+        ),
+      };
     }
 
-    return request<GetPostsResponse>(`/posts${qs}`, { method: "GET" });
+    // comments — пока просто вернем как есть (отсортируем позже, когда будут counts)
+    return res;
   },
 
   getPost: async (id: number | string): Promise<Post> => {

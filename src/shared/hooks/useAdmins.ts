@@ -32,6 +32,7 @@ export const useAdminsQuery = (params?: GetUsersParams) => {
     queryKey: ["admins", params],
     queryFn: () => adminsApi.getAdmins(params),
     staleTime: 30 * 1000,
+    placeholderData: (prev) => prev,
   });
 };
 

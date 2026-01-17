@@ -19,6 +19,22 @@ const mapSort = (sort?: string) => {
   return {};
 };
 
+const norm = (v: unknown) =>
+  String(v ?? "")
+    .toLowerCase()
+    .trim();
+
+const matchesName = (u: any, search: string) => {
+  const q = norm(search);
+  if (!q) return true;
+
+  const first = norm(u?.firstName);
+  const last = norm(u?.lastName);
+  const full = `${first} ${last}`.trim();
+
+  return first.includes(q) || last.includes(q) || full.includes(q);
+};
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
@@ -37,11 +53,7 @@ export async function GET(req: Request) {
   if (sortBy) qs.set("sortBy", sortBy);
   if (order) qs.set("order", order);
 
-  const url = search
-    ? `${UPSTREAM}/users/search?q=${encodeURIComponent(
-        search
-      )}&${qs.toString()}`
-    : `${UPSTREAM}/users?${qs.toString()}`;
+  const url = `${UPSTREAM}/users?${qs.toString()}`;
 
   const res = await fetch(url, { cache: "no-store" });
 
@@ -55,8 +67,11 @@ export async function GET(req: Request) {
   const json = (await res.json()) as { users: any[] };
 
   const admins = (json.users || []).filter((u) => u?.role === "admin");
-  const total = admins.length;
-  const page = admins.slice(skip, skip + limit);
+
+  const filtered = admins.filter((u) => matchesName(u, search));
+
+  const total = filtered.length;
+  const page = filtered.slice(skip, skip + limit);
 
   return NextResponse.json({
     users: page,
