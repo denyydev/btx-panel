@@ -104,6 +104,7 @@ export default function CommentsPage() {
           </p>
 
           <AppSearchInput
+            placeholder="Поиск по комментариям"
             value={search}
             onChange={(v) => {
               setSearch(v);

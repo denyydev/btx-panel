@@ -47,7 +47,6 @@ export default function PostsPage() {
 
   const skip = (page - 1) * rowsPerPage;
 
-  // server sort только там, где апстрим точно умеет
   const serverSort =
     sortKey === "id" || sortKey === "views"
       ? `${sortKey}:${sortDir}`
@@ -87,7 +86,6 @@ export default function PostsPage() {
   );
   const commentsCountsQ = usePostsCommentsCounts(postIds);
 
-  // client-side sort для likes/comments (потому что server не умеет / данных нет в posts list)
   const sortedRows = useMemo(() => {
     const rows = [...rowsWithAuthor];
     const dir = sortDir === "asc" ? 1 : -1;
@@ -104,14 +102,13 @@ export default function PostsPage() {
         return (ac - bc) * dir;
       });
     }
-    // id/views на сервере, тут не трогаем
+
     return rows;
   }, [rowsWithAuthor, sortKey, sortDir, commentsCountsQ.map]);
 
   const isInitialLoading =
     (postsQ.isLoading && !postsQ.data) || (usersQ.isLoading && !usersQ.data);
 
-  // рефетч — не прячем таблицу, просто оверлей над списком/таблицей
   const isRefetching =
     postsQ.isFetching ||
     usersQ.isFetching ||

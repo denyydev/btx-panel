@@ -28,12 +28,6 @@ export default function DashboardLayout({
 
   useSocket();
 
-  useEffect(() => {
-    const cookieToken = Cookies.get(JWT_COOKIE_NAME) || null;
-    if (cookieToken && !token) setToken(cookieToken);
-    if (!cookieToken && token) setToken(null);
-  }, [token, setToken]);
-
   const { isLoading, isError, data } = useAuthMe();
 
   useEffect(() => {
@@ -43,17 +37,26 @@ export default function DashboardLayout({
   }, [data, userInStore, setUser]);
 
   useEffect(() => {
-    if (!token) {
+    // Проверяем наличие токена в cookie или store
+    const cookieToken = Cookies.get(JWT_COOKIE_NAME) || null;
+    const hasToken = cookieToken || token;
+
+    // Если нет токена и загрузка завершена - редирект на логин
+    if (!hasToken && !isLoading) {
       router.push("/login");
       return;
     }
+
+    // Если ошибка при загрузке пользователя - разлогиниваем
     if (!isLoading && isError) {
       logoutStore();
       router.push("/login");
     }
   }, [token, isLoading, isError, router, logoutStore]);
 
-  if (!token || isLoading) return null;
+  // Показываем loading пока загружаем данные или пока нет токена
+  const cookieToken = Cookies.get(JWT_COOKIE_NAME) || null;
+  if ((!token && !cookieToken) || isLoading) return null;
 
   const user: any = userInStore || (data as any)?.user || data;
   if (!user) return null;
@@ -66,9 +69,10 @@ export default function DashboardLayout({
   const email = user?.email || "";
   const avatar = user?.image || "";
 
-  const logout = () => {
-    logoutStore();
-    router.push("/login");
+  const logout = async () => {
+    await logoutStore();
+    // Используем window.location для принудительного редиректа
+    window.location.href = "/login";
   };
 
   const isActive = (href: string) =>

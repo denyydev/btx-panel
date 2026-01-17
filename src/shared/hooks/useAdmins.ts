@@ -1,3 +1,4 @@
+import { socket } from "@/providers/socket-provider"; // поправь под свой путь
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminsApi } from "../api/admins.service";
 import type {
@@ -67,7 +68,15 @@ export const useCreateAdmin = () => {
         total: prev.total + 1,
       }));
 
-      return { previous };
+      return { previous, optimisticId: optimisticAdmin.id };
+    },
+
+    onSuccess: (_created, _vars, ctx) => {
+      socket.emit("entity:changed", {
+        entity: "admin",
+        action: "create",
+        id: ctx?.optimisticId,
+      });
     },
 
     onError: (_err, _data, ctx) => {
@@ -117,7 +126,15 @@ export const useUpdateAdmin = () => {
         ),
       }));
 
-      return { previous };
+      return { previous, adminId: id };
+    },
+
+    onSuccess: (_updated, _vars, ctx) => {
+      socket.emit("entity:changed", {
+        entity: "admin",
+        action: "update",
+        id: ctx?.adminId,
+      });
     },
 
     onError: (_err, _vars, ctx) => {
@@ -147,7 +164,15 @@ export const useDeleteAdmin = () => {
         total: Math.max(0, prev.total - 1),
       }));
 
-      return { previous };
+      return { previous, adminId: id };
+    },
+
+    onSuccess: (_data, _id, ctx) => {
+      socket.emit("entity:changed", {
+        entity: "admin",
+        action: "delete",
+        id: ctx?.adminId,
+      });
     },
 
     onError: (_err, _id, ctx) => {

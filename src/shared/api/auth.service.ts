@@ -33,5 +33,12 @@ export const authApi = {
       token,
     });
   },
+
+  logout: async (): Promise<void> => {
+    // Вызываем наш API endpoint для logout
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+    });
+  },
 };
 

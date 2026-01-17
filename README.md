@@ -1,5 +1,7 @@
 # BTX Admin Panel
 
+<img src="./public/btx_cover.png" width="700" />
+
 ## Tech Stack
 
 - **Next.js 16** (App Router)

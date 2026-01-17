@@ -14,9 +14,10 @@ const AppUser = () => {
     [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim() ||
     "Пользователь";
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
+  const handleLogout = async () => {
+    await logout();
+    // Используем window.location для принудительного редиректа
+    window.location.href = "/login";
   };
 
   return (
