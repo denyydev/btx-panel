@@ -73,24 +73,6 @@ Socket server will run at: **http://localhost:3001**
 
 ---
 
-## Socket Architecture
-
-- `socket-server.js` runs as a separate Node.js process
-- Client connects via socket.io-client
-- CORS is restricted via `SOCKET_ORIGIN`
-- Socket URL defaults to `http://localhost:3001` if not configured
-
----
-
-## Development Notes
-
-- React Strict Mode may cause effects to run twice in development
-- Socket initialization is protected via `useRef`
-- Do not hardcode socket URLs in client code
-- Restart both servers after changing `.env.local`
-
----
-
 ## Scripts
 
 ```bash
