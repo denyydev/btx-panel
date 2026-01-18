@@ -1,6 +1,8 @@
 # BTX Admin Panel
 
+Admin panel project built as part of a hiring process.  
 Admin panel for managing BTX entities with real-time updates via Socket.IO.
+
 <img src="./public/btx_cover.png" width="700" />
 
 ---
