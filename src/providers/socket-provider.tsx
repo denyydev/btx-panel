@@ -2,7 +2,8 @@
 
 import { addToast } from "@heroui/react";
 import { useEffect, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
+import { socket } from "@/shared/lib/socket";
 
 type EntityChangedPayload = {
   entity: "user" | "admin";
@@ -12,19 +13,10 @@ type EntityChangedPayload = {
   at?: string;
 };
 
-const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL ?? "http://localhost:3001";
-
 export const SocketProvider = () => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    const socket = io(SOCKET_URL, {
-      transports: ["websocket"],
-      autoConnect: true,
-      withCredentials: true,
-    });
-
     socketRef.current = socket;
 
     const onConnect = () => {
@@ -55,7 +47,6 @@ export const SocketProvider = () => {
     return () => {
       socket.off("connect", onConnect);
       socket.off("entity:changed", onEntityChanged);
-      socket.disconnect();
       socketRef.current = null;
     };
   }, []);

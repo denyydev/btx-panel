@@ -1,4 +1,4 @@
-import { socket } from "@/providers/socket-provider";
+import { socket } from "../lib/socket";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminsApi } from "../api/admins.service";
 import type {
@@ -11,7 +11,7 @@ import type {
 
 const updateAllAdminsCaches = (
   queryClient: ReturnType<typeof useQueryClient>,
-  updater: (prev: GetUsersResponse) => GetUsersResponse
+  updater: (prev: GetUsersResponse) => GetUsersResponse,
 ) => {
   queryClient
     .getQueriesData<GetUsersResponse>({ queryKey: ["admins"] })
@@ -122,7 +122,7 @@ export const useUpdateAdmin = () => {
                   : {}),
                 role: "admin",
                 ...(data.image != null ? { image: data.image } : {}),
-              }
+              },
         ),
       }));
 

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { socket } from "../../providers/socket-provider";
+import { socket } from "../lib/socket";
 import type { GetUsersResponse, User } from "../api/users.service";
 import {
   CreateUserRequest,
@@ -10,7 +10,7 @@ import {
 
 const updateAllUsersCaches = (
   queryClient: ReturnType<typeof useQueryClient>,
-  updater: (prev: GetUsersResponse) => GetUsersResponse
+  updater: (prev: GetUsersResponse) => GetUsersResponse,
 ) => {
   queryClient
     .getQueriesData<GetUsersResponse>({ queryKey: ["users"] })
@@ -121,7 +121,7 @@ export const useUpdateUser = () => {
                   : {}),
                 ...(data.role != null ? { role: data.role } : {}),
                 ...(data.image != null ? { image: data.image } : {}),
-              }
+              },
         ),
       }));
 
